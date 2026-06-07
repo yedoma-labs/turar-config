@@ -17,7 +17,7 @@ Type-safe configuration management with file loading, environment cascading, and
 ```bash
 npm install @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
 # or
-bun add @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
+pnpm add @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
 ```
 
 ## Quick Start
