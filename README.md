@@ -774,13 +774,163 @@ const config = createConfigSync({
 - ✅ Easy to generate programmatically
 - ✅ Good for machine-generated configs
 
+## Config File Watching (Hot Reload)
+
+Watch config files for changes and automatically reload configuration in development. Perfect for updating feature flags, connection strings, or other settings without restarting your app.
+
+### Basic Usage
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { watchConfig } from "@yedoma-labs/turar-config";
+
+const handle = await watchConfig({
+  schema: {
+    server_port: eg.port().default(3000),
+    database_host: eg.string().required(),
+    features_enableDebug: eg.boolean().default(false),
+  },
+  configDir: "./config",
+  onChange: (newConfig, change, oldConfig) => {
+    console.log(`Config changed: ${change.type} ${change.path}`);
+    console.log(`Debug mode: ${oldConfig.features_enableDebug} → ${newConfig.features_enableDebug}`);
+    
+    // Update your app with new config
+    updateFeatureFlags(newConfig);
+  },
+  debounce: 500, // Wait 500ms after last change before reloading
+});
+
+// Get current config at any time
+const currentConfig = handle.getConfig();
+
+// Stop watching when done
+await handle.stop();
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `onChange` | `function` | `undefined` | Callback when config changes |
+| `debounce` | `number` | `500` | Milliseconds to wait after last change |
+| `ignoreInitial` | `boolean` | `true` | Don't trigger onChange on startup |
+| All config options | | | Same as `createConfig()` |
+
+### onChange Callback
+
+```typescript
+type OnChange = (
+  newConfig: ConfigResult,
+  change: ConfigChange,
+  oldConfig: ConfigResult
+) => void;
+
+interface ConfigChange {
+  type: "added" | "changed" | "removed";
+  path: string;       // Full path to changed file
+  timestamp: Date;    // When change was detected
+}
+```
+
+### Watch Handle
+
+```typescript
+interface WatchHandle {
+  stop(): Promise<void>;          // Stop watching
+  getConfig(): ConfigResult;      // Get current config
+}
+```
+
+### Use Cases
+
+**Feature Flags**
+```typescript
+const handle = await watchConfig({
+  schema: {
+    features_newUI: eg.boolean().default(false),
+    features_betaFeatures: eg.boolean().default(false),
+  },
+  configDir: "./config",
+  onChange: (newConfig) => {
+    // Update feature flags without restart
+    featureFlags.update(newConfig);
+  },
+});
+```
+
+**Database Connection Pool**
+```typescript
+const handle = await watchConfig({
+  schema: {
+    database_pool_min: eg.integer().default(2),
+    database_pool_max: eg.integer().default(10),
+  },
+  configDir: "./config",
+  onChange: (newConfig, change, oldConfig) => {
+    if (
+      newConfig.database_pool_max !== oldConfig.database_pool_max ||
+      newConfig.database_pool_min !== oldConfig.database_pool_min
+    ) {
+      // Reconfigure pool without restart
+      databasePool.reconfigure({
+        min: newConfig.database_pool_min,
+        max: newConfig.database_pool_max,
+      });
+    }
+  },
+});
+```
+
+**Development Mode Only**
+```typescript
+let handle: WatchHandle | null = null;
+
+if (process.env.NODE_ENV === "development") {
+  handle = await watchConfig({
+    schema: mySchema,
+    configDir: "./config",
+    onChange: (newConfig) => {
+      console.log("🔄 Config reloaded:", newConfig);
+    },
+  });
+}
+
+// Cleanup on shutdown
+process.on("SIGTERM", async () => {
+  if (handle) await handle.stop();
+});
+```
+
+### What Files are Watched?
+
+- All `.json`, `.yaml`, `.yml`, and `.toml` files in `configDir`
+- Recursive (watches subdirectories too)
+- Changes, additions, and deletions are detected
+- Uses efficient file system events (not polling)
+
+### Performance Notes
+
+- **Debouncing** prevents excessive reloads during rapid changes
+- **Minimal overhead** - uses native file system events
+- **Safe** - validates config before calling `onChange`
+- **Graceful errors** - logs errors without crashing your app
+
+### Best Practices
+
+✅ **Use in development only** - Production apps should restart on config changes  
+✅ **Set appropriate debounce** - 500ms works well for most cases  
+✅ **Handle partial updates** - Check what changed before applying  
+✅ **Test error scenarios** - Ensure app handles invalid config gracefully  
+✅ **Stop watching on shutdown** - Call `handle.stop()` in cleanup hooks  
+
 ## Roadmap
 
 - [ ] HashiCorp Vault integration
 - [ ] AWS Secrets Manager support
 - [x] **YAML config file support** ✅
 - [x] **TOML config file support** ✅
-- [ ] Config file watching / hot reload
+- [x] **Config file watching / hot reload** ✅
 - [ ] Config migration helpers
 
 ## License

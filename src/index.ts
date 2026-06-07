@@ -6,13 +6,20 @@ import { deepMerge, flattenObject } from "./core/merger.js";
 import { loadSecrets } from "./core/secrets-client.js";
 import type { ConfigResult, CreateConfigOptions } from "./types.js";
 
+export { type WatchHandle, watchConfig } from "./core/watcher.js";
 export {
 	ConfigError,
 	ConfigFileError,
 	ConfigInterpolationError,
 	ConfigSecretError,
 } from "./errors.js";
-export type { ConfigResult, CreateConfigOptions, SecretsProviderConfig } from "./types.js";
+export type {
+	ConfigChange,
+	ConfigResult,
+	CreateConfigOptions,
+	SecretsProviderConfig,
+	WatchConfigOptions,
+} from "./types.js";
 
 export async function createConfig<T extends SchemaDefinition>(
 	options: CreateConfigOptions<T>,

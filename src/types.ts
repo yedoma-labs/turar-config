@@ -23,3 +23,15 @@ export interface LoadedConfigData {
 	environment: Record<string, unknown>;
 	merged: Record<string, unknown>;
 }
+
+export interface ConfigChange {
+	type: "added" | "changed" | "removed";
+	path: string;
+	timestamp: Date;
+}
+
+export interface WatchConfigOptions<T extends SchemaDefinition> extends CreateConfigOptions<T> {
+	onChange?: (newConfig: ConfigResult<T>, change: ConfigChange, oldConfig: ConfigResult<T>) => void;
+	debounce?: number;
+	ignoreInitial?: boolean;
+}
