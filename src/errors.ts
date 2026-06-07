@@ -11,7 +11,8 @@ export class ConfigFileError extends ConfigError {
 		public readonly path: string,
 		public readonly cause?: unknown,
 	) {
-		super(`${message}: ${path}`);
+		const sanitizedPath = path.length > 50 ? `...${path.slice(-50)}` : path;
+		super(`${message}: ${sanitizedPath}`);
 		this.name = "ConfigFileError";
 	}
 }

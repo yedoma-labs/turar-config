@@ -12,5 +12,6 @@ export async function loadSecrets(config: SecretsProviderConfig): Promise<Record
 		);
 	}
 
-	throw new ConfigSecretError(`Unknown secrets provider: ${config.provider}`);
+	const sanitizedProvider = String(config.provider).substring(0, 50);
+	throw new ConfigSecretError(`Unknown secrets provider: ${sanitizedProvider}`);
 }

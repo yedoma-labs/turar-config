@@ -1,7 +1,21 @@
+const MAX_DEPTH = 100;
+
 export function deepMerge(
 	target: Record<string, unknown>,
 	...sources: Record<string, unknown>[]
 ): Record<string, unknown> {
+	return deepMergeInternal(target, sources, 0);
+}
+
+function deepMergeInternal(
+	target: Record<string, unknown>,
+	sources: Record<string, unknown>[],
+	depth: number,
+): Record<string, unknown> {
+	if (depth > MAX_DEPTH) {
+		throw new Error("Maximum nesting depth exceeded in deepMerge");
+	}
+
 	if (sources.length === 0) {
 		return target;
 	}
@@ -14,12 +28,17 @@ export function deepMerge(
 				continue;
 			}
 
+			if (key === "__proto__" || key === "constructor" || key === "prototype") {
+				continue;
+			}
+
 			const targetValue = result[key];
 
 			if (isPlainObject(value) && isPlainObject(targetValue)) {
-				result[key] = deepMerge(
+				result[key] = deepMergeInternal(
 					targetValue as Record<string, unknown>,
-					value as Record<string, unknown>,
+					[value as Record<string, unknown>],
+					depth + 1,
 				);
 			} else {
 				result[key] = value;
@@ -47,14 +66,22 @@ export function flattenObject(
 	obj: Record<string, unknown>,
 	prefix = "",
 	separator = "_",
+	depth = 0,
 ): Record<string, string> {
+	if (depth > MAX_DEPTH) {
+		throw new Error("Maximum nesting depth exceeded in flattenObject");
+	}
+
 	const result: Record<string, string> = {};
 
 	for (const [key, value] of Object.entries(obj)) {
 		const newKey = prefix ? `${prefix}${separator}${key}` : key;
 
 		if (isPlainObject(value)) {
-			Object.assign(result, flattenObject(value as Record<string, unknown>, newKey, separator));
+			Object.assign(
+				result,
+				flattenObject(value as Record<string, unknown>, newKey, separator, depth + 1),
+			);
 		} else if (value !== undefined && value !== null) {
 			result[newKey] = String(value);
 		}
