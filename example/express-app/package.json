@@ -1,0 +1,25 @@
+{
+  "name": "turar-config-express-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express.js integration example for @yedoma-labs/turar-config",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@yedoma-labs/bylyt-env-guard": "^0.3.5",
+    "@yedoma-labs/turar-config": "^0.1.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "cors": {
+    "origins": ["http://localhost:3000", "http://localhost:8080"]
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "myapp_dev",
+    "pool": {
+      "min": 2,
+      "max": 10
+    }
+  },
+  "redis": {
+    "url": "redis://localhost:6379"
+  },
+  "features": {
+    "enableMetrics": false,
+    "enableDebugMode": true
+  }
+}

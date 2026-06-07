@@ -28,9 +28,9 @@ Type-safe configuration management with file loading, environment cascading, and
 ## Installation
 
 ```bash
-npm install @yedoma-labs/turar-config @yedoma-labs/turar-config
+npm install @yedoma-labs/bylyt-env-guard @yedoma-labs/turar-config
 # or
-pnpm add @yedoma-labs/turar-config @yedoma-labs/turar-config
+pnpm add @yedoma-labs/bylyt-env-guard @yedoma-labs/turar-config
 ```
 
 ## Quick Start
@@ -295,6 +295,341 @@ try {
   }
 }
 ```
+
+## Integration with bylyt-env-guard
+
+turar-config is an **orchestration layer** built on top of bylyt-env-guard. Here's how they work together:
+
+### Architecture
+
+```
+┌─────────────────────────────────────────┐
+│         Your Application                │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│     turar-config (this package)         │
+│  • Load JSON files                      │
+│  • Merge configs                        │
+│  • Interpolate ${VAR}                   │
+│  • Flatten objects                      │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│     bylyt-env-guard (peer dep)          │
+│  • Validate types                       │
+│  • Type coercion                        │
+│  • Type inference                       │
+│  • Freeze result                        │
+└─────────────────────────────────────────┘
+```
+
+### Responsibilities
+
+| Feature | Handled By | Description |
+|---------|-----------|-------------|
+| File Loading | turar-config | Load `config/*.json` files |
+| Cascading | turar-config | Merge configs by environment |
+| Interpolation | turar-config | Resolve `${VAR}` in JSON |
+| Flattening | turar-config | `{db: {host}}` → `{db_host}` |
+| **Validation** | bylyt-env-guard | Type checking, constraints |
+| **Type Safety** | bylyt-env-guard | TypeScript inference |
+| **Freezing** | bylyt-env-guard | Immutable config object |
+
+### When to Use What?
+
+**Use bylyt-env-guard alone** if:
+- ✅ You only need environment variables
+- ✅ Simple .env file is sufficient
+- ✅ No multi-environment configs
+
+**Use turar-config** if:
+- ✅ You have config files (JSON)
+- ✅ Different configs per environment (dev/staging/prod)
+- ✅ Need `${VAR}` interpolation in configs
+- ✅ Want to centralize config management
+
+## Advanced Examples
+
+### Multi-Environment Setup
+
+```bash
+# File structure
+config/
+  default.json        # Base config (always loaded)
+  development.json    # Local development
+  staging.json        # Staging environment  
+  production.json     # Production
+```
+
+```typescript
+// Automatically loads config/{NODE_ENV}.json
+process.env.NODE_ENV = "production";
+
+const config = createConfigSync({
+  schema: {
+    api_url: eg.url().required(),
+    database_pool_max: eg.integer().default(10),
+  },
+  configDir: "./config",
+});
+
+// In production: loads default.json + production.json
+// Values from production.json override default.json
+```
+
+### Express.js Integration
+
+```typescript
+import express from "express";
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfigSync } from "@yedoma-labs/turar-config";
+
+const config = createConfigSync({
+  schema: {
+    port: eg.port().default(3000),
+    cors_origins: eg.array().of("string"),
+    session_secret: eg.string().sensitive().required(),
+    database_url: eg.url().required(),
+  },
+  configDir: "./config",
+  envFile: true,
+});
+
+const app = express();
+
+app.use(cors({ origin: config.cors_origins }));
+app.use(session({ secret: config.session_secret }));
+
+app.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
+});
+```
+
+### NestJS Integration
+
+```typescript
+// config.service.ts
+import { Injectable } from "@nestjs/common";
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfigSync } from "@yedoma-labs/turar-config";
+
+@Injectable()
+export class ConfigService {
+  private readonly config = createConfigSync({
+    schema: {
+      database_host: eg.string().required(),
+      database_port: eg.port().default(5432),
+      redis_url: eg.url().required(),
+      jwt_secret: eg.string().sensitive().required(),
+    },
+    configDir: "./config",
+    prefix: "APP_",
+  });
+
+  get database() {
+    return {
+      host: this.config.database_host,
+      port: this.config.database_port,
+    };
+  }
+
+  get redis() {
+    return this.config.redis_url;
+  }
+}
+```
+
+### Nested Object Configs
+
+```json
+// config/default.json
+{
+  "services": {
+    "redis": {
+      "host": "localhost",
+      "port": 6379,
+      "options": {
+        "maxRetriesPerRequest": 3,
+        "enableReadyCheck": true
+      }
+    },
+    "database": {
+      "primary": { "host": "db1.local", "port": 5432 },
+      "replica": { "host": "db2.local", "port": 5432 }
+    }
+  }
+}
+```
+
+```typescript
+const config = createConfigSync({
+  schema: {
+    services_redis_host: eg.string(),
+    services_redis_port: eg.port(),
+    services_redis_options_maxRetriesPerRequest: eg.integer(),
+    services_database_primary_host: eg.string(),
+    services_database_primary_port: eg.port(),
+    services_database_replica_host: eg.string(),
+    services_database_replica_port: eg.port(),
+  },
+  configDir: "./config",
+});
+
+// Access flattened keys
+const redisHost = config.services_redis_host;
+const primaryDbHost = config.services_database_primary_host;
+```
+
+## Best Practices
+
+### File Structure
+
+```bash
+project/
+├── config/
+│   ├── default.json       # Required: base config
+│   ├── development.json   # Optional: overrides for dev
+│   ├── test.json          # Optional: test environment
+│   ├── staging.json       # Optional: staging env
+│   └── production.json    # Optional: production env
+├── .env                   # Optional: local overrides (gitignored)
+├── .env.example           # Commit this: documents required env vars
+└── src/
+    └── config.ts          # Config setup
+```
+
+### Security Guidelines
+
+**✅ DO:**
+- Commit `config/*.json` files (non-sensitive defaults)
+- Commit `.env.example` (template)
+- Use `.sensitive()` for secrets in schema
+- Use `${VAR}` interpolation for secrets in production.json
+- Set real secrets via environment variables
+
+**❌ DON'T:**
+- Commit `.env` files (add to .gitignore)
+- Put secrets directly in JSON files
+- Commit production credentials
+- Log config values marked `.sensitive()`
+
+### Performance Tips
+
+1. **Use `createConfigSync` when possible** - Faster startup
+2. **Keep config files small** - Load time is linear with file size
+3. **Minimize interpolations** - Each `${VAR}` is a lookup
+4. **Use flattened schemas** - Avoid deep nesting (5+ levels)
+
+### Naming Conventions
+
+```typescript
+// Consistent naming: lowercase with underscores
+const schema = {
+  database_url: eg.url(),           // ✅ Good
+  database_connection_timeout: eg.integer(),  // ✅ Good
+  
+  DatabaseURL: eg.url(),            // ❌ Avoid
+  "database-url": eg.url(),         // ❌ Avoid (kebab-case)
+};
+
+// Environment variable mapping
+// With prefix="APP_":
+// APP_database_url → config.database_url
+// APP_database_connection_timeout → config.database_connection_timeout
+```
+
+## Troubleshooting
+
+### Common Errors
+
+#### "Invalid environment name"
+
+```typescript
+// ❌ Error: path traversal attempt
+loadConfigFiles("./config", "../etc/passwd");
+
+// ✅ Fix: use alphanumeric names only
+loadConfigFiles("./config", "production");
+```
+
+#### "Undefined environment variable"
+
+```json
+// config/production.json
+{ "api_key": "${API_KEY}" }
+```
+
+```bash
+# ❌ Error: API_KEY not set
+NODE_ENV=production node app.js
+
+# ✅ Fix: set env var first
+API_KEY=secret123 NODE_ENV=production node app.js
+```
+
+#### "Config file must contain a JSON object"
+
+```json
+// ❌ Invalid: array at root
+["value1", "value2"]
+
+// ✅ Valid: object at root
+{ "values": ["value1", "value2"] }
+```
+
+### Debugging Config Loading
+
+```typescript
+import { createConfigSync } from "@yedoma-labs/turar-config";
+
+try {
+  const config = createConfigSync({
+    schema: { /* ... */ },
+    configDir: "./config",
+  });
+  
+  // Log loaded config (excluding sensitive values)
+  console.log("Config loaded:", JSON.stringify(config, null, 2));
+  
+} catch (error) {
+  if (error instanceof ConfigFileError) {
+    console.error("Failed to load:", error.path);
+    console.error("Reason:", error.message);
+  } else if (error instanceof ConfigInterpolationError) {
+    console.error("Undefined variable:", error.variable);
+  } else if (error instanceof EnvValidationError) {
+    console.error("Validation failures:");
+    for (const failure of error.failures) {
+      console.error(`  ${failure.field}: ${failure.message}`);
+    }
+  }
+}
+```
+
+### Environment Variable Priority
+
+If a value isn't what you expect, check the priority order:
+
+```bash
+# Priority (highest to lowest):
+1. process.env.APP_database_host      # Direct env var
+2. .env file: APP_database_host=...   # .env file (if envFile: true)
+3. config/production.json             # Environment config
+4. config/default.json                # Base config
+5. schema: eg.string().default(...)   # Schema default
+```
+
+## Migration Guides
+
+See [docs/migration.md](./docs/migration.md) for detailed guides:
+
+- [From dotenv](./docs/migration.md#from-dotenv)
+- [From node-config](./docs/migration.md#from-node-config)
+- [From rc](./docs/migration.md#from-rc)
+- [From convict](./docs/migration.md#from-convict)
 
 ## Roadmap
 
