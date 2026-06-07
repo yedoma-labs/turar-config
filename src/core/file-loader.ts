@@ -32,8 +32,11 @@ export function loadConfigFiles(
 	configDir: string,
 	environmentName?: string,
 ): { base: Record<string, unknown>; environment: Record<string, unknown> } {
-	if (environmentName && !/^[a-zA-Z0-9_-]+$/.test(environmentName)) {
-		throw new ConfigFileError("Invalid environment name", environmentName);
+	if (environmentName !== undefined && !/^[a-zA-Z0-9_-]+$/.test(environmentName)) {
+		throw new ConfigFileError(
+			"Invalid environment name (only a-zA-Z0-9_- allowed)",
+			environmentName || "(empty)",
+		);
 	}
 
 	const baseFile = resolve(configDir, "default.json");
