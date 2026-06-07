@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/npm/l/@yedoma-labs/turar-config)](LICENSE)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/@yedoma-labs/turar-config)](https://bundlephobia.com/package/@yedoma-labs/turar-config)
 
-Type-safe configuration management with file loading, environment cascading, and secrets integration. Extends [@yedoma-labs/turar-config](https://github.com/yedoma-labs/turar-config) with advanced config file handling.
+Type-safe configuration management with file loading, environment cascading, and secrets integration. Built on [@yedoma-labs/bylyt-env-guard](https://github.com/yedoma-labs/bylyt-env-guard) for type-safe validation.
 
 ## Features
 
@@ -73,7 +73,7 @@ pnpm add @yedoma-labs/bylyt-env-guard @yedoma-labs/turar-config
 ### 2. Define schema and load config
 
 ```typescript
-import { eg } from "@yedoma-labs/turar-config";
+import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
@@ -99,9 +99,10 @@ Configuration values are merged with the following priority (highest to lowest):
 
 1. **Environment variables** - `process.env.APP_database_host`
 2. **`.env` file** - Values from `.env` (if `envFile: true`)
-3. **Environment config** - `config/{NODE_ENV}.json`
-4. **Base config** - `config/default.json`
-5. **Schema defaults** - `.default()` values in schema
+3. **Secrets** - HashiCorp Vault or other secrets providers (if configured)
+4. **Environment config** - `config/{NODE_ENV}.json`
+5. **Base config** - `config/default.json`
+6. **Schema defaults** - `.default()` values in schema
 
 ### Example Cascade
 
@@ -149,7 +150,7 @@ To escape interpolation, use `\${VAR}`:
 
 ### `createConfig(options)`
 
-Async version supporting vault secrets providers (coming soon).
+Async version supporting HashiCorp Vault secrets provider.
 
 ```typescript
 const config = await createConfig({
@@ -219,7 +220,7 @@ your-project/
 ### Basic Web Server
 
 ```typescript
-import { eg } from "@yedoma-labs/turar-config";
+import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
@@ -1277,4 +1278,4 @@ MIT
 
 ## Related Projects
 
-- [@yedoma-labs/turar-config](https://github.com/yedoma-labs/turar-config) - Zero-dependency env validation
+- [@yedoma-labs/bylyt-env-guard](https://github.com/yedoma-labs/bylyt-env-guard) - Zero-dependency env validation
