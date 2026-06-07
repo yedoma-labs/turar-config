@@ -1,0 +1,16 @@
+{
+  "server": {
+    "port": 3001
+  },
+  "database": {
+    "host": "localhost",
+    "name": "myapp_dev"
+  },
+  "logging": {
+    "level": "debug",
+    "colorize": true
+  },
+  "features": {
+    "enableNewUI": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "server": {
+    "port": 8080,
+    "trustProxy": true
+  },
+  "cors": {
+    "origins": ["https://app.example.com", "https://admin.example.com"]
+  },
+  "database": {
+    "host": "${DB_HOST}",
+    "port": "${DB_PORT}",
+    "name": "${DB_NAME}",
+    "user": "${DB_USER}",
+    "pool": {
+      "min": 10,
+      "max": 100
+    },
+    "ssl": true
+  },
+  "redis": {
+    "enabled": true,
+    "host": "${REDIS_HOST}",
+    "port": "${REDIS_PORT}"
+  },
+  "logging": {
+    "level": "warn"
+  },
+  "rateLimit": {
+    "windowMs": 60000,
+    "max": 50
+  }
+}

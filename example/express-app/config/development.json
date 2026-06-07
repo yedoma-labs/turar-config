@@ -1,0 +1,21 @@
+{
+  "server": {
+    "port": 3001
+  },
+  "cors": {
+    "origins": ["http://localhost:3000", "http://localhost:3001"]
+  },
+  "database": {
+    "name": "express_app_dev"
+  },
+  "redis": {
+    "enabled": true
+  },
+  "logging": {
+    "level": "debug",
+    "format": "dev"
+  },
+  "rateLimit": {
+    "max": 1000
+  }
+}

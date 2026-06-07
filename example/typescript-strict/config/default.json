@@ -1,0 +1,14 @@
+{
+  "api": {
+    "baseUrl": "https://api.example.com",
+    "timeout": 5000,
+    "retries": 3
+  },
+  "database": {
+    "url": "postgresql://localhost:5432/mydb"
+  },
+  "features": {
+    "enableCache": true,
+    "maxConnections": 100
+  }
+}

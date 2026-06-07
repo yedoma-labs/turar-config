@@ -1,0 +1,22 @@
+{
+  "server": {
+    "port": 8080,
+    "timeout": 60000
+  },
+  "database": {
+    "host": "${DB_HOST}",
+    "port": "${DB_PORT}",
+    "name": "${DB_NAME}",
+    "pool": {
+      "min": 10,
+      "max": 100
+    },
+    "ssl": true
+  },
+  "logging": {
+    "level": "warn"
+  },
+  "features": {
+    "enableAnalytics": true
+  }
+}

@@ -41,13 +41,31 @@
     "environment",
     "validation",
     "type-safe",
+    "typescript",
     "cascade",
     "secrets",
-    "json"
+    "json",
+    "env",
+    "dotenv",
+    "settings",
+    "bylyt",
+    "schema",
+    "multi-environment",
+    "interpolation",
+    "config-files",
+    "env-guard",
+    "zero-dependency",
+    "express",
+    "fastify",
+    "nestjs"
   ],
+  "homepage": "https://github.com/yedoma-labs/turar-config#readme",
+  "bugs": {
+    "url": "https://github.com/yedoma-labs/turar-config/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yedoma-labs/turar-config"
+    "url": "https://github.com/yedoma-labs/turar-config.git"
   },
   "author": "",
   "license": "MIT",
