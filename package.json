@@ -1,0 +1,66 @@
+{
+  "name": "@yedoma-labs/turar-config",
+  "version": "0.1.0",
+  "description": "Type-safe configuration management with file loading, environment cascading, and secrets integration - extends bylyt-env-guard",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check src tests",
+    "lint:fix": "biome check --write src tests",
+    "format": "biome format --write src tests",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "config",
+    "configuration",
+    "environment",
+    "validation",
+    "type-safe",
+    "cascade",
+    "secrets",
+    "json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yedoma-labs/turar-config"
+  },
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@yedoma-labs/bylyt-env-guard": "^0.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@types/node": "25.9.1",
+    "@vitest/coverage-v8": "^4.1.7",
+    "@yedoma-labs/bylyt-env-guard": "^0.3.5",
+    "tsdown": "^0.22.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.7"
+  }
+}

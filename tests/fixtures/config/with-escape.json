@@ -1,0 +1,4 @@
+{
+	"example": "This is a literal \\${NOT_INTERPOLATED}",
+	"interpolated": "${SHOULD_INTERPOLATE}"
+}

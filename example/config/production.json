@@ -1,0 +1,23 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "database": {
+    "host": "${DB_HOST}",
+    "port": 5432,
+    "name": "myapp_prod",
+    "pool": {
+      "min": 10,
+      "max": 100
+    },
+    "ssl": true
+  },
+  "logging": {
+    "level": "warn",
+    "colorize": false
+  },
+  "features": {
+    "enableNewUI": true
+  }
+}
