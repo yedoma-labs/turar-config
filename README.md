@@ -278,6 +278,13 @@ const config = createConfigSync({
 ## Error Handling
 
 ```typescript
+import { eg, EnvValidationError } from "@yedoma-labs/bylyt-env-guard";
+import {
+  createConfigSync,
+  ConfigFileError,
+  ConfigInterpolationError,
+} from "@yedoma-labs/turar-config";
+
 try {
   const config = createConfigSync({
     schema: {
@@ -386,6 +393,8 @@ const config = createConfigSync({
 
 ```typescript
 import express from "express";
+import cors from "cors";
+import session from "express-session";
 import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
