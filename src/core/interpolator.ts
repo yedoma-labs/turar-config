@@ -39,10 +39,7 @@ export function interpolateObject(
 	depth = 0,
 ): Record<string, unknown> {
 	if (depth > MAX_DEPTH) {
-		throw new ConfigInterpolationError(
-			"Maximum nesting depth exceeded",
-			`depth: ${depth}`,
-		);
+		throw new ConfigInterpolationError("Maximum nesting depth exceeded", `depth: ${depth}`);
 	}
 
 	const result: Record<string, unknown> = {};

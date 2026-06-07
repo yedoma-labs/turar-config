@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { resolve, basename } from "node:path";
+import { resolve } from "node:path";
 import { ConfigFileError } from "../errors.js";
 
 export function loadJsonFile(filePath: string): Record<string, unknown> {

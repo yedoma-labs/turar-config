@@ -1,15 +1,13 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { ConfigFileError, ConfigInterpolationError } from "../src/errors.js";
+import { describe, expect, it } from "vitest";
 import { loadConfigFiles } from "../src/core/file-loader.js";
-import { deepMerge } from "../src/core/merger.js";
 import { interpolateObject, interpolateValue } from "../src/core/interpolator.js";
+import { deepMerge } from "../src/core/merger.js";
+import { ConfigFileError, ConfigInterpolationError } from "../src/errors.js";
 
 describe("Security Tests", () => {
 	describe("Path Traversal Protection", () => {
 		it("rejects environment names with path traversal", () => {
-			expect(() => loadConfigFiles("./tests/fixtures/config", "../etc")).toThrow(
-				ConfigFileError,
-			);
+			expect(() => loadConfigFiles("./tests/fixtures/config", "../etc")).toThrow(ConfigFileError);
 			expect(() => loadConfigFiles("./tests/fixtures/config", "../etc")).toThrow(
 				/Invalid environment name/,
 			);
@@ -22,20 +20,18 @@ describe("Security Tests", () => {
 		});
 
 		it("rejects environment names with relative path prefixes", () => {
-			expect(() => loadConfigFiles("./tests/fixtures/config", "./test")).toThrow(
-				ConfigFileError,
-			);
+			expect(() => loadConfigFiles("./tests/fixtures/config", "./test")).toThrow(ConfigFileError);
 		});
 
 		it("rejects environment names with null bytes", () => {
-			expect(() => loadConfigFiles("./tests/fixtures/config", "test\0")).toThrow(
-				ConfigFileError,
-			);
+			expect(() => loadConfigFiles("./tests/fixtures/config", "test\0")).toThrow(ConfigFileError);
 		});
 
 		it("rejects empty environment names", () => {
 			expect(() => loadConfigFiles("./tests/fixtures/config", "")).toThrow(ConfigFileError);
-			expect(() => loadConfigFiles("./tests/fixtures/config", "")).toThrow(/Invalid environment name/);
+			expect(() => loadConfigFiles("./tests/fixtures/config", "")).toThrow(
+				/Invalid environment name/,
+			);
 		});
 
 		it("rejects environment names with special characters", () => {
@@ -172,9 +168,7 @@ describe("Security Tests", () => {
 				deepObj = { arr: [deepObj] };
 			}
 
-			expect(() => interpolateObject(deepObj, { TEST: "value" })).toThrow(
-				ConfigInterpolationError,
-			);
+			expect(() => interpolateObject(deepObj, { TEST: "value" })).toThrow(ConfigInterpolationError);
 		});
 	});
 
@@ -201,15 +195,13 @@ describe("Security Tests", () => {
 		it("checks length before interpolation", () => {
 			const longString = "${VAR}".repeat(2000); // > 10000 chars before interpolation
 
-			expect(() => interpolateValue(longString, { VAR: "x" })).toThrow(
-				ConfigInterpolationError,
-			);
+			expect(() => interpolateValue(longString, { VAR: "x" })).toThrow(ConfigInterpolationError);
 		});
 	});
 
 	describe("Error Message Sanitization", () => {
 		it("limits path length in ConfigFileError messages", () => {
-			const longPath = "/very/long/path/" + "a".repeat(100) + "/config.json";
+			const longPath = `/very/long/path/${"a".repeat(100)}/config.json`;
 			const error = new ConfigFileError("Test error", longPath);
 
 			expect(error.message.length).toBeLessThan(150);
