@@ -173,6 +173,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Critical security vulnerabilities** (comprehensive security audit)
+  - **ReDoS prevention**: Replaced regex interpolation with manual parser (eliminates catastrophic backtracking)
+  - **Circular reference detection**: Added WeakSet-based cycle detection in interpolateObject
+  - **File size limits**: 10MB max file size check before reading (prevents OOM attacks)
+  - **Vault URL validation**: Only allow http/https protocols, validate hostname (prevents SSRF)
+  - **Vault path validation**: Block path traversal (..), only allow safe characters
+  - **Vault depth limits**: MAX_DEPTH=100 in flattenSecrets (prevents DoS)
+  - **Windows path traversal**: Explicit backslash rejection in environment names
+  - **Error message security**: Sanitize to first line only, 200 char limit (prevents info disclosure)
+  - **Watcher race conditions**: Proper error handler cleanup, stopped flag protection
+  - **Separator validation**: Non-empty, non-alphanumeric enforcement in flattenObject
+  - **Prototype pollution hardening**: Block ___proto__, __proto, CONSTRUCTOR, PROTOTYPE variations
+  - **Path sanitization**: Better ConfigFileError path display (basename + first 100 chars)
+
+### Added
+
+- **Enhanced security test suite** (21 new tests in security-enhanced.test.ts)
+  - ReDoS prevention tests (large strings, nested braces, expansion attacks)
+  - Circular reference detection tests (direct cycles, array cycles, deep cycles)
+  - File size limit tests (reject >10MB, accept <10MB)
+  - Vault security tests (URL/path validation, SSRF prevention, depth limits)
+  - Separator validation tests
+  - Prototype pollution variation tests
+  - Windows path separator tests
+
+### Changed
+
+- **Interpolation engine**: Manual parser replaces regex (faster, safer)
+- **Vault secret handling**: Arrays now JSON.stringify'd to preserve type info
+- **Watcher behavior**: Config always updates on successful reload (onChange errors don't rollback)
+- **Test coverage**: 98.36% → 97.4% (170 tests, added edge case error paths)
+
 ### Planned
 
 - AWS Secrets Manager integration
