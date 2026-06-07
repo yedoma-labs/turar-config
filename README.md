@@ -1,6 +1,19 @@
 # @yedoma-labs/turar-config
 
-Type-safe configuration management with file loading, environment cascading, and secrets integration. Extends [@yedoma-labs/bylyt-env-guard](https://github.com/yedoma-labs/bylyt-env-guard) with advanced config file handling.
+<picture>
+  <source media="(max-width: 640px)" srcset="https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized-mobile.png">
+  <img src="https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized.png" alt="Project Header">
+</picture>
+
+[![CI](https://github.com/yedoma-labs/turar-config/actions/workflows/ci.yml/badge.svg)](https://github.com/yedoma-labs/turar-config/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@yedoma-labs/turar-config)](https://www.npmjs.com/package/@yedoma-labs/turar-config)
+[![npm downloads](https://img.shields.io/npm/dm/@yedoma-labs/turar-config)](https://www.npmjs.com/package/@yedoma-labs/turar-config)
+[![Node.js](https://img.shields.io/node/v/@yedoma-labs/turar-config)](https://www.npmjs.com/package/@yedoma-labs/turar-config)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x+-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
+[![License](https://img.shields.io/npm/l/@yedoma-labs/turar-config)](LICENSE)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@yedoma-labs/turar-config)](https://bundlephobia.com/package/@yedoma-labs/turar-config)
+
+Type-safe configuration management with file loading, environment cascading, and secrets integration. Extends [@yedoma-labs/turar-config](https://github.com/yedoma-labs/turar-config) with advanced config file handling.
 
 ## Features
 
@@ -10,14 +23,14 @@ Type-safe configuration management with file loading, environment cascading, and
 - 🔐 **Type-safe** - Full TypeScript inference from schema
 - ✅ **Validation** - Uses bylyt's zero-dependency validation
 - 🔗 **Interpolation** - Reference env vars with `${VAR}` syntax in config files
-- 🚀 **Zero dependencies** - Only peer depends on bylyt-env-guard
+- 🚀 **Zero dependencies** - Only peer depends on turar-config
 
 ## Installation
 
 ```bash
-npm install @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
+npm install @yedoma-labs/turar-config @yedoma-labs/turar-config
 # or
-pnpm add @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
+pnpm add @yedoma-labs/turar-config @yedoma-labs/turar-config
 ```
 
 ## Quick Start
@@ -59,7 +72,7 @@ pnpm add @yedoma-labs/turar-config @yedoma-labs/bylyt-env-guard
 ### 2. Define schema and load config
 
 ```typescript
-import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { eg } from "@yedoma-labs/turar-config";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
@@ -205,7 +218,7 @@ your-project/
 ### Basic Web Server
 
 ```typescript
-import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { eg } from "@yedoma-labs/turar-config";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
@@ -298,4 +311,4 @@ MIT
 
 ## Related Projects
 
-- [@yedoma-labs/bylyt-env-guard](https://github.com/yedoma-labs/bylyt-env-guard) - Zero-dependency env validation
+- [@yedoma-labs/turar-config](https://github.com/yedoma-labs/turar-config) - Zero-dependency env validation
