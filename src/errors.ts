@@ -28,7 +28,10 @@ export class ConfigInterpolationError extends ConfigError {
 }
 
 export class ConfigSecretError extends ConfigError {
-	constructor(message: string) {
+	constructor(
+		message: string,
+		public readonly cause?: unknown,
+	) {
 		super(message);
 		this.name = "ConfigSecretError";
 	}

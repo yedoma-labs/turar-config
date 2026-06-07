@@ -43,10 +43,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 	try {
 		currentConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
 	} catch (error) {
-		// If initial load fails, ensure no resources leak
-		if (watcher) {
-			await watcher.close();
-		}
+		// If initial load fails, re-throw (watcher not created yet, no cleanup needed)
 		throw error;
 	}
 
