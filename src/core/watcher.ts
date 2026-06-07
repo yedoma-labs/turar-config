@@ -38,6 +38,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 	let watcher: FSWatcher | null = null;
 	let debounceTimer: NodeJS.Timeout | null = null;
 	let stopped = false;
+	let errorHandler: ((error: Error) => void) | null = null;
 
 	// Load initial config with error handling
 	try {
@@ -65,13 +66,19 @@ export async function watchConfig<T extends SchemaDefinition>(
 		},
 	});
 
+	/**
+	 * Handle file change events with debouncing.
+	 * Debouncing prevents excessive reloads during rapid file changes.
+	 * The stopped flag ensures no callbacks fire after stop() is called.
+	 */
 	const handleChange = async (changeType: "added" | "changed" | "removed", filePath: string) => {
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
+			debounceTimer = null;
 		}
 
 		debounceTimer = setTimeout(async () => {
-			// Check if watcher was stopped
+			// Check if watcher was stopped before processing
 			if (stopped) {
 				return;
 			}
@@ -87,17 +94,16 @@ export async function watchConfig<T extends SchemaDefinition>(
 
 				const oldConfig = currentConfig;
 
-				// Call onChange first, only update currentConfig if it succeeds
+				// Always update currentConfig on successful reload
+				currentConfig = newConfig;
+
+				// Call onChange callback if provided (errors don't rollback config)
 				if (onChange) {
 					try {
 						onChange(newConfig, change, oldConfig);
-						currentConfig = newConfig;
 					} catch (callbackError) {
 						console.error("[turar-config] Error in onChange callback:", callbackError);
-						// Don't update currentConfig if callback failed
 					}
-				} else {
-					currentConfig = newConfig;
 				}
 			} catch (error) {
 				console.error("[turar-config] Error reloading config:", error);
@@ -109,18 +115,28 @@ export async function watchConfig<T extends SchemaDefinition>(
 	watcher.on("change", (path) => handleChange("changed", path));
 	watcher.on("unlink", (path) => handleChange("removed", path));
 
-	watcher.on("error", (error) => {
+	errorHandler = (error: Error) => {
 		console.error("[turar-config] Watcher error:", error);
-	});
+	};
+	watcher.on("error", errorHandler);
 
 	return {
 		stop: async () => {
+			// Set stopped flag first to prevent any pending callbacks
 			stopped = true;
+
+			// Clear any pending debounce timer
 			if (debounceTimer) {
 				clearTimeout(debounceTimer);
 				debounceTimer = null;
 			}
+
+			// Remove error handler and close watcher
 			if (watcher) {
+				if (errorHandler) {
+					watcher.off("error", errorHandler);
+					errorHandler = null;
+				}
 				await watcher.close();
 				watcher = null;
 			}

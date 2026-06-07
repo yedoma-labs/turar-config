@@ -2,12 +2,16 @@ import vault from "node-vault";
 import { ConfigSecretError } from "../errors.js";
 import type { SecretsProviderConfig, VaultConfig } from "../types.js";
 
+const MAX_DEPTH = 100;
+const ENV_PROVIDER = "env" as const;
+const VAULT_PROVIDER = "vault" as const;
+
 export async function loadSecrets(config: SecretsProviderConfig): Promise<Record<string, string>> {
-	if (config.provider === "env") {
+	if (config.provider === ENV_PROVIDER) {
 		return {};
 	}
 
-	if (config.provider === "vault") {
+	if (config.provider === VAULT_PROVIDER) {
 		return loadVaultSecrets(config);
 	}
 
@@ -24,6 +28,12 @@ async function loadVaultSecrets(config: SecretsProviderConfig): Promise<Record<s
 			"Vault configuration missing. Provide either 'vault' object or legacy 'vaultUrl', 'vaultToken', 'vaultPath' fields.",
 		);
 	}
+
+	// Validate Vault URL to prevent SSRF
+	validateVaultUrl(vaultConfig.url);
+
+	// Validate Vault path to prevent traversal
+	validateVaultPath(vaultConfig.path);
 
 	try {
 		const client = vault({
@@ -56,12 +66,57 @@ async function loadVaultSecrets(config: SecretsProviderConfig): Promise<Record<s
 		return flattenSecrets(secrets);
 	} catch (error) {
 		// Sanitize error to avoid leaking sensitive info
+		// Take only first line and limit length
 		const errorMsg = error instanceof Error ? error.message : "Unknown error";
-		const sanitizedMsg = errorMsg.substring(0, 200);
+		const firstLine = errorMsg.split("\n")[0] || "";
+		const sanitizedMsg = firstLine.substring(0, 200);
 
 		throw new ConfigSecretError(
 			`Failed to load secrets from HashiCorp Vault: ${sanitizedMsg}`,
 			error,
+		);
+	}
+}
+
+/**
+ * Validate Vault URL to prevent SSRF and malformed URLs
+ */
+function validateVaultUrl(url: string): void {
+	try {
+		const parsed = new URL(url);
+
+		// Only allow HTTP/HTTPS
+		if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+			throw new ConfigSecretError(
+				`Invalid Vault URL protocol: ${parsed.protocol}. Only http: and https: are allowed.`,
+			);
+		}
+
+		// Validate hostname is not empty
+		if (!parsed.hostname) {
+			throw new ConfigSecretError("Invalid Vault URL: hostname is required");
+		}
+	} catch (error) {
+		if (error instanceof ConfigSecretError) {
+			throw error;
+		}
+		throw new ConfigSecretError(`Invalid Vault URL: ${url}`, error);
+	}
+}
+
+/**
+ * Validate Vault path to prevent path traversal
+ */
+function validateVaultPath(path: string): void {
+	// Reject paths with ..
+	if (path.includes("..")) {
+		throw new ConfigSecretError(`Invalid Vault path: contains '..' traversal: ${path}`);
+	}
+
+	// Only allow safe characters
+	if (!/^[a-zA-Z0-9/_-]+$/.test(path)) {
+		throw new ConfigSecretError(
+			`Invalid Vault path: contains unsafe characters. Only a-z, A-Z, 0-9, /, _, - are allowed: ${path}`,
 		);
 	}
 }
@@ -87,7 +142,16 @@ function normalizeVaultConfig(config: SecretsProviderConfig): VaultConfig | null
 	return null;
 }
 
-function flattenSecrets(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
+function flattenSecrets(
+	obj: Record<string, unknown>,
+	prefix = "",
+	depth = 0,
+): Record<string, string> {
+	// Prevent DoS via deeply nested secrets
+	if (depth > MAX_DEPTH) {
+		throw new ConfigSecretError(`Maximum nesting depth (${MAX_DEPTH}) exceeded in Vault secrets`);
+	}
+
 	const result: Record<string, string> = {};
 
 	for (const [key, value] of Object.entries(obj)) {
@@ -98,7 +162,10 @@ function flattenSecrets(obj: Record<string, unknown>, prefix = ""): Record<strin
 		}
 
 		if (typeof value === "object" && !Array.isArray(value)) {
-			Object.assign(result, flattenSecrets(value as Record<string, unknown>, fullKey));
+			Object.assign(result, flattenSecrets(value as Record<string, unknown>, fullKey, depth + 1));
+		} else if (Array.isArray(value)) {
+			// Stringify arrays to preserve type information
+			result[fullKey] = JSON.stringify(value);
 		} else {
 			result[fullKey] = String(value);
 		}

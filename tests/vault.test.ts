@@ -302,7 +302,8 @@ describe("HashiCorp Vault Integration", () => {
 
 			expect(config.number).toBe(42);
 			expect(config.boolean).toBe(true);
-			expect(config.array).toBe("1,2,3");
+			// Arrays are now JSON.stringify'd to preserve type information
+			expect(config.array).toBe("[1,2,3]");
 		});
 	});
 

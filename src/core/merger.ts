@@ -28,7 +28,16 @@ function deepMergeInternal(
 				continue;
 			}
 
-			if (key === "__proto__" || key === "constructor" || key === "prototype") {
+			// Block dangerous property names and their variations
+			if (
+				key === "__proto__" ||
+				key === "constructor" ||
+				key === "prototype" ||
+				key === "___proto__" ||
+				key === "__proto" ||
+				key === "CONSTRUCTOR" ||
+				key === "PROTOTYPE"
+			) {
 				continue;
 			}
 
@@ -68,6 +77,14 @@ export function flattenObject(
 	separator = "_",
 	depth = 0,
 ): Record<string, string> {
+	// Validate separator to prevent key collisions
+	if (separator.length === 0) {
+		throw new Error("Separator cannot be empty in flattenObject");
+	}
+	if (/[a-zA-Z0-9]/.test(separator)) {
+		throw new Error("Separator cannot contain alphanumeric characters in flattenObject");
+	}
+
 	if (depth > MAX_DEPTH) {
 		throw new Error("Maximum nesting depth exceeded in flattenObject");
 	}

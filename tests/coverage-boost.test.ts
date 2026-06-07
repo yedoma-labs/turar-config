@@ -87,9 +87,10 @@ describe("Coverage Boost Tests", () => {
 				expect.any(Error),
 			);
 
-			// Config should NOT be updated due to callback error
+			// Config SHOULD be updated even if onChange throws
+			// (onChange is notification only, not a validator)
 			const config = handle.getConfig();
-			expect(config.test).toBe("value1"); // Still old value
+			expect(config.test).toBe("value2"); // New value applied
 
 			await handle.stop();
 			consoleError.mockRestore();

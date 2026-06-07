@@ -1,8 +1,10 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import { parse as parseToml } from "@iarna/toml";
 import { parse as parseYaml } from "yaml";
 import { ConfigFileError } from "../errors.js";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 type ConfigFormat = "json" | "yaml" | "toml";
 
@@ -45,8 +47,15 @@ function parseContent(
 			throw err;
 		}
 		// Sanitize error message to avoid leaking large file contents
-		const errorMsg = err instanceof Error ? err.message.slice(0, 200) : "Parse error";
-		throw new ConfigFileError(`Invalid ${format.toUpperCase()} syntax: ${errorMsg}`, filePath, err);
+		// Take only first line and limit length
+		const errorMsg = err instanceof Error ? err.message : "Parse error";
+		const firstLine = errorMsg.split("\n")[0] || "";
+		const sanitizedMsg = firstLine.slice(0, 200);
+		throw new ConfigFileError(
+			`Invalid ${format.toUpperCase()} syntax: ${sanitizedMsg}`,
+			filePath,
+			err,
+		);
 	}
 }
 
@@ -54,6 +63,15 @@ export function loadConfigFile(filePath: string): Record<string, unknown> {
 	const resolvedPath = resolve(filePath);
 
 	try {
+		// Check file size before reading to prevent OOM
+		const stats = statSync(resolvedPath);
+		if (stats.size > MAX_FILE_SIZE) {
+			throw new ConfigFileError(
+				`Config file exceeds maximum size of ${MAX_FILE_SIZE} bytes (${stats.size} bytes)`,
+				resolvedPath,
+			);
+		}
+
 		const content = readFileSync(resolvedPath, "utf-8");
 		const format = detectFormat(resolvedPath);
 		return parseContent(content, format, resolvedPath);
@@ -86,11 +104,18 @@ export function loadConfigFiles(
 	configDir: string,
 	environmentName?: string,
 ): { base: Record<string, unknown>; environment: Record<string, unknown> } {
-	if (environmentName !== undefined && !/^[a-zA-Z0-9_-]+$/.test(environmentName)) {
-		throw new ConfigFileError(
-			"Invalid environment name (only a-zA-Z0-9_- allowed)",
-			environmentName || "(empty)",
-		);
+	// Validate environment name to prevent path traversal (including Windows backslash)
+	if (environmentName !== undefined) {
+		if (
+			environmentName.length === 0 ||
+			!/^[a-zA-Z0-9_-]+$/.test(environmentName) ||
+			environmentName.includes("\\")
+		) {
+			throw new ConfigFileError(
+				"Invalid environment name (only a-zA-Z0-9_- allowed, no path separators)",
+				environmentName || "(empty)",
+			);
+		}
 	}
 
 	const baseFile = findConfigFile(configDir, "default");
