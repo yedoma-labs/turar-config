@@ -33,7 +33,10 @@ function parseContent(
 		}
 
 		if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-			throw new ConfigFileError("Config file must contain an object", filePath);
+			throw new ConfigFileError(
+				"Config file must contain an object at root (not array or primitive)",
+				filePath,
+			);
 		}
 
 		return parsed as Record<string, unknown>;
@@ -41,7 +44,9 @@ function parseContent(
 		if (err instanceof ConfigFileError) {
 			throw err;
 		}
-		throw new ConfigFileError(`Invalid ${format.toUpperCase()} syntax`, filePath, err);
+		// Sanitize error message to avoid leaking large file contents
+		const errorMsg = err instanceof Error ? err.message.slice(0, 200) : "Parse error";
+		throw new ConfigFileError(`Invalid ${format.toUpperCase()} syntax: ${errorMsg}`, filePath, err);
 	}
 }
 
@@ -64,6 +69,7 @@ export function loadConfigFile(filePath: string): Record<string, unknown> {
 }
 
 function findConfigFile(configDir: string, baseName: string): string | null {
+	// Format priority: YAML (.yaml, .yml) > TOML > JSON
 	const extensions = [".yaml", ".yml", ".toml", ".json"];
 
 	for (const ext of extensions) {

@@ -19,8 +19,6 @@ export interface ConfigChange {
 	timestamp: Date;
 }
 
-let debounceTimer: NodeJS.Timeout | null = null;
-
 export async function watchConfig<T extends SchemaDefinition>(
 	options: WatchConfigOptions<T>,
 ): Promise<WatchHandle<T>> {
@@ -38,9 +36,19 @@ export async function watchConfig<T extends SchemaDefinition>(
 
 	let currentConfig: ConfigResult<T>;
 	let watcher: FSWatcher | null = null;
+	let debounceTimer: NodeJS.Timeout | null = null;
+	let stopped = false;
 
-	// Load initial config
-	currentConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
+	// Load initial config with error handling
+	try {
+		currentConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
+	} catch (error) {
+		// If initial load fails, ensure no resources leak
+		if (watcher) {
+			await watcher.close();
+		}
+		throw error;
+	}
 
 	// Set up file watcher
 	const resolvedConfigDir = resolve(configDir);
@@ -66,6 +74,11 @@ export async function watchConfig<T extends SchemaDefinition>(
 		}
 
 		debounceTimer = setTimeout(async () => {
+			// Check if watcher was stopped
+			if (stopped) {
+				return;
+			}
+
 			try {
 				const newConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
 
@@ -76,10 +89,18 @@ export async function watchConfig<T extends SchemaDefinition>(
 				};
 
 				const oldConfig = currentConfig;
-				currentConfig = newConfig;
 
+				// Call onChange first, only update currentConfig if it succeeds
 				if (onChange) {
-					onChange(newConfig, change, oldConfig);
+					try {
+						onChange(newConfig, change, oldConfig);
+						currentConfig = newConfig;
+					} catch (callbackError) {
+						console.error("[turar-config] Error in onChange callback:", callbackError);
+						// Don't update currentConfig if callback failed
+					}
+				} else {
+					currentConfig = newConfig;
 				}
 			} catch (error) {
 				console.error("[turar-config] Error reloading config:", error);
@@ -97,6 +118,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 
 	return {
 		stop: async () => {
+			stopped = true;
 			if (debounceTimer) {
 				clearTimeout(debounceTimer);
 				debounceTimer = null;
