@@ -1,42 +1,35 @@
-import { describe, expect, it } from "vitest";
 import { eg } from "@yedoma-labs/bylyt-env-guard";
-import {
-	ConfigSecretError,
-	createConfig,
-	createConfigSync,
-	type CreateConfigOptions,
-} from "../src/index.js";
-import { loadSecrets } from "../src/core/secrets-client.js";
+import { describe, expect, it } from "vitest";
 import { loadConfigFiles } from "../src/core/file-loader.js";
 import { deepMerge, flattenObject } from "../src/core/merger.js";
+import { loadSecrets } from "../src/core/secrets-client.js";
+import { ConfigSecretError, createConfig, createConfigSync } from "../src/index.js";
 
 describe("Coverage Gap Tests", () => {
 	describe("Secrets Provider", () => {
 		it("throws ConfigSecretError for vault provider", async () => {
-			await expect(
-				loadSecrets({ provider: "vault", path: "secret/app" }),
-			).rejects.toThrow(ConfigSecretError);
+			await expect(loadSecrets({ provider: "vault", path: "secret/app" })).rejects.toThrow(
+				ConfigSecretError,
+			);
 
-			await expect(
-				loadSecrets({ provider: "vault", path: "secret/app" }),
-			).rejects.toThrow("HashiCorp Vault provider not yet implemented");
+			await expect(loadSecrets({ provider: "vault", path: "secret/app" })).rejects.toThrow(
+				"HashiCorp Vault provider not yet implemented",
+			);
 		});
 
 		it("throws ConfigSecretError for unknown provider", async () => {
-			await expect(
-				loadSecrets({ provider: "unknown" as any }),
-			).rejects.toThrow(ConfigSecretError);
+			await expect(loadSecrets({ provider: "unknown" as any })).rejects.toThrow(ConfigSecretError);
 
-			await expect(
-				loadSecrets({ provider: "unknown" as any }),
-			).rejects.toThrow("Unknown secrets provider");
+			await expect(loadSecrets({ provider: "unknown" as any })).rejects.toThrow(
+				"Unknown secrets provider",
+			);
 		});
 
 		it("sanitizes long provider names in error", async () => {
 			const longProvider = "a".repeat(100);
-			await expect(
-				loadSecrets({ provider: longProvider as any }),
-			).rejects.toThrow(ConfigSecretError);
+			await expect(loadSecrets({ provider: longProvider as any })).rejects.toThrow(
+				ConfigSecretError,
+			);
 
 			try {
 				await loadSecrets({ provider: longProvider as any });

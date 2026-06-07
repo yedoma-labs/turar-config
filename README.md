@@ -631,12 +631,155 @@ See [docs/migration.md](./docs/migration.md) for detailed guides:
 - [From rc](./docs/migration.md#from-rc)
 - [From convict](./docs/migration.md#from-convict)
 
+## YAML and TOML Support
+
+turar-config automatically detects and loads configuration files in multiple formats:
+
+### Supported Formats
+
+- **JSON** (`.json`) - Traditional format
+- **YAML** (`.yaml`, `.yml`) - Human-friendly, great for complex configs ✨ NEW
+- **TOML** (`.toml`) - Minimal, clear syntax ✨ NEW
+
+### Format Priority
+
+When multiple formats exist, files are loaded in this order:
+
+1. `.yaml` / `.yml`
+2. `.json`
+3. `.toml`
+
+Example:
+```
+config/
+  default.yaml      # ← Loaded (YAML has priority)
+  default.json      # Ignored (YAML exists)
+  production.toml   # ← Loaded (no YAML/JSON for production)
+```
+
+### YAML Example
+
+```yaml
+# config/default.yaml
+server:
+  host: localhost
+  port: 3000
+
+database:
+  host: localhost
+  port: 5432
+  pool:
+    min: 2
+    max: 10
+
+features:
+  enableMetrics: false
+  enableDebug: true
+```
+
+```yaml
+# config/production.yaml
+server:
+  host: 0.0.0.0
+  port: 8080
+
+database:
+  host: ${DB_HOST}
+  name: ${DB_NAME}
+  pool:
+    max: 100
+
+features:
+  enableMetrics: true
+  enableDebug: false
+```
+
+### TOML Example
+
+```toml
+# config/default.toml
+[server]
+host = "localhost"
+port = 3000
+
+[database]
+host = "localhost"
+port = 5432
+name = "myapp_dev"
+
+[database.pool]
+min = 2
+max = 10
+
+[features]
+enableMetrics = false
+enableDebug = true
+```
+
+```toml
+# config/production.toml
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+host = "${DB_HOST}"
+name = "${DB_NAME}"
+
+[database.pool]
+max = 100
+
+[features]
+enableMetrics = true
+enableDebug = false
+```
+
+### Usage
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfigSync } from "@yedoma-labs/turar-config";
+
+// Automatically detects YAML/TOML/JSON
+const config = createConfigSync({
+  schema: {
+    server_host: eg.string(),
+    server_port: eg.port(),
+    database_host: eg.string(),
+    features_enableMetrics: eg.boolean(),
+  },
+  configDir: "./config", // Looks for .yaml, .yml, .toml, .json
+});
+```
+
+### Why YAML/TOML?
+
+**YAML Benefits:**
+- ✅ No quotes needed for strings
+- ✅ Comments with `#`
+- ✅ Multi-line strings with `|` or `>`
+- ✅ More readable for complex nested configs
+- ✅ Industry standard (Kubernetes, Docker Compose, GitHub Actions)
+
+**TOML Benefits:**
+- ✅ Clear, minimal syntax
+- ✅ Tables for nested structures
+- ✅ Explicit types (no ambiguity like YAML's Norway problem)
+- ✅ Good for flat configs
+- ✅ Popular in Rust ecosystem (Cargo.toml)
+
+**JSON Benefits:**
+- ✅ Universal support
+- ✅ Strict syntax (no surprises)
+- ✅ Easy to generate programmatically
+- ✅ Good for machine-generated configs
+
 ## Roadmap
 
 - [ ] HashiCorp Vault integration
 - [ ] AWS Secrets Manager support
-- [ ] YAML config file support
-- [ ] TOML config file support
+- [x] **YAML config file support** ✅
+- [x] **TOML config file support** ✅
 - [ ] Config file watching / hot reload
 - [ ] Config migration helpers
 

@@ -1,0 +1,14 @@
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+host = "${DB_HOST}"
+name = "${DB_NAME}"
+
+[database.pool]
+max = 100
+
+[features]
+enableMetrics = true
+enableDebug = false

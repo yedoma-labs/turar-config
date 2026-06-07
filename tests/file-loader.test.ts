@@ -2,10 +2,10 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { loadConfigFiles, loadJsonFile } from "../src/core/file-loader.js";
+import { loadConfigFile, loadConfigFiles } from "../src/core/file-loader.js";
 import { ConfigFileError } from "../src/errors.js";
 
-describe("loadJsonFile", () => {
+describe("loadConfigFile", () => {
 	let testDir: string;
 
 	beforeEach(() => {
@@ -18,7 +18,7 @@ describe("loadJsonFile", () => {
 	});
 
 	it("returns empty object for missing file", () => {
-		const result = loadJsonFile(join(testDir, "missing.json"));
+		const result = loadConfigFile(join(testDir, "missing.json"));
 		expect(result).toEqual({});
 	});
 
@@ -26,7 +26,7 @@ describe("loadJsonFile", () => {
 		const filePath = join(testDir, "valid.json");
 		writeFileSync(filePath, JSON.stringify({ foo: "bar", nested: { value: 42 } }));
 
-		const result = loadJsonFile(filePath);
+		const result = loadConfigFile(filePath);
 		expect(result).toEqual({ foo: "bar", nested: { value: 42 } });
 	});
 
@@ -34,23 +34,23 @@ describe("loadJsonFile", () => {
 		const filePath = join(testDir, "invalid.json");
 		writeFileSync(filePath, "{ invalid json }");
 
-		expect(() => loadJsonFile(filePath)).toThrow(ConfigFileError);
-		expect(() => loadJsonFile(filePath)).toThrow(/Invalid JSON syntax/);
+		expect(() => loadConfigFile(filePath)).toThrow(ConfigFileError);
+		expect(() => loadConfigFile(filePath)).toThrow(/Invalid JSON syntax/);
 	});
 
 	it("throws ConfigFileError for non-object JSON", () => {
 		const filePath = join(testDir, "array.json");
 		writeFileSync(filePath, JSON.stringify([1, 2, 3]));
 
-		expect(() => loadJsonFile(filePath)).toThrow(ConfigFileError);
-		expect(() => loadJsonFile(filePath)).toThrow(/must contain a JSON object/);
+		expect(() => loadConfigFile(filePath)).toThrow(ConfigFileError);
+		expect(() => loadConfigFile(filePath)).toThrow(/must contain an object/);
 	});
 
 	it("throws ConfigFileError for primitive JSON", () => {
 		const filePath = join(testDir, "string.json");
 		writeFileSync(filePath, JSON.stringify("just a string"));
 
-		expect(() => loadJsonFile(filePath)).toThrow(ConfigFileError);
+		expect(() => loadConfigFile(filePath)).toThrow(ConfigFileError);
 	});
 
 	it("handles nested objects", () => {
@@ -68,7 +68,7 @@ describe("loadJsonFile", () => {
 			}),
 		);
 
-		const result = loadJsonFile(filePath);
+		const result = loadConfigFile(filePath);
 		expect(result).toEqual({
 			level1: {
 				level2: {

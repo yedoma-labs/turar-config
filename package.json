@@ -80,5 +80,9 @@
     "tsdown": "^0.22.2",
     "typescript": "6.0.3",
     "vitest": "4.1.8"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "yaml": "^2.9.0"
   }
 }
