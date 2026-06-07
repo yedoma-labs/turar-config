@@ -17,13 +17,14 @@ Type-safe configuration management with file loading, environment cascading, and
 
 ## Features
 
-- 📁 **File-based config** - Load JSON configs from `config/` directory
-- 🌍 **Environment cascading** - Merge `default.json` → `{NODE_ENV}.json` → env vars
-- 🔒 **Secrets integration** - Support for `.env` files and vault providers (Vault support coming soon)
+- 📁 **Multi-format config** - JSON, YAML, TOML support with auto-detection
+- 🌍 **Environment cascading** - Merge `default` → `{NODE_ENV}` → env vars
+- 🔒 **Secrets integration** - HashiCorp Vault (token + AppRole), `.env` files
 - 🔐 **Type-safe** - Full TypeScript inference from schema
-- ✅ **Validation** - Uses bylyt's zero-dependency validation
+- ✅ **Validation** - Uses bylyt-env-guard's zero-dependency validation
 - 🔗 **Interpolation** - Reference env vars with `${VAR}` syntax in config files
-- 🚀 **Zero dependencies** - Only peer depends on turar-config
+- 🔥 **Hot reload** - File watching with debouncing for development
+- 🚀 **Minimal dependencies** - Only node-vault for Vault support
 
 ## Installation
 
@@ -924,9 +925,346 @@ process.on("SIGTERM", async () => {
 ✅ **Test error scenarios** - Ensure app handles invalid config gracefully  
 ✅ **Stop watching on shutdown** - Call `handle.stop()` in cleanup hooks  
 
+## HashiCorp Vault Integration
+
+Load secrets from HashiCorp Vault at runtime. Supports both token and AppRole authentication.
+
+### Quick Start
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfig } from "@yedoma-labs/turar-config";
+
+const config = await createConfig({
+  schema: {
+    database_host: eg.string().required(),
+    database_password: eg.string().required(),
+    api_key: eg.string().required(),
+  },
+  configDir: "./config",
+  secrets: {
+    provider: "vault",
+    vault: {
+      url: "https://vault.example.com",
+      auth: {
+        type: "token",
+        token: process.env.VAULT_TOKEN!,
+      },
+      path: "myapp/config",
+    },
+  },
+});
+
+console.log(config.database_password); // Secret from Vault
+```
+
+### Token Authentication
+
+Simplest method - use a Vault token directly:
+
+```typescript
+const config = await createConfig({
+  schema: { /* ... */ },
+  secrets: {
+    provider: "vault",
+    vault: {
+      url: "https://vault.example.com",
+      auth: {
+        type: "token",
+        token: process.env.VAULT_TOKEN!, // Read from environment
+      },
+      path: "myapp/production/config",
+      mountPath: "secret", // Optional, defaults to "secret"
+      namespace: "my-namespace", // Optional, for Vault Enterprise
+    },
+  },
+});
+```
+
+### AppRole Authentication
+
+Recommended for production - use AppRole for better security:
+
+```typescript
+const config = await createConfig({
+  schema: { /* ... */ },
+  secrets: {
+    provider: "vault",
+    vault: {
+      url: "https://vault.example.com",
+      auth: {
+        type: "appRole",
+        roleId: process.env.VAULT_ROLE_ID!,
+        secretId: process.env.VAULT_SECRET_ID!,
+      },
+      path: "myapp/production/config",
+    },
+  },
+});
+```
+
+### Vault Configuration Options
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `url` | `string` | Yes | Vault server URL |
+| `auth` | `VaultAuth` | Yes | Authentication config |
+| `path` | `string` | Yes | Path to secrets in KV store |
+| `mountPath` | `string` | No | KV mount path (default: `"secret"`) |
+| `namespace` | `string` | No | Vault namespace (Enterprise only) |
+
+### Authentication Types
+
+**Token Auth:**
+```typescript
+auth: {
+  type: "token",
+  token: string,
+}
+```
+
+**AppRole Auth:**
+```typescript
+auth: {
+  type: "appRole",
+  roleId: string,
+  secretId: string,
+}
+```
+
+### Nested Secrets
+
+Vault secrets are automatically flattened using underscore separators:
+
+**Vault KV Store:**
+```json
+// vault kv get secret/myapp/config
+{
+  "database": {
+    "host": "db.example.com",
+    "credentials": {
+      "username": "admin",
+      "password": "secret123"
+    }
+  },
+  "api_key": "key-xyz"
+}
+```
+
+**Flattened Config:**
+```typescript
+const config = await createConfig({
+  schema: {
+    database_host: eg.string().required(),
+    database_credentials_username: eg.string().required(),
+    database_credentials_password: eg.string().required(),
+    api_key: eg.string().required(),
+  },
+  secrets: { /* vault config */ },
+});
+
+console.log(config.database_host); // "db.example.com"
+console.log(config.database_credentials_username); // "admin"
+console.log(config.api_key); // "key-xyz"
+```
+
+### Priority Order
+
+Secrets from Vault have **higher priority** than config files but **lower priority** than environment variables:
+
+```
+Environment Variables (highest priority)
+       ↓
+  Vault Secrets
+       ↓
+   .env file
+       ↓
+Config Files (lowest priority)
+```
+
+Example:
+```typescript
+// config/default.json
+{ "api_key": "dev-key" }
+
+// Vault secret
+{ "api_key": "vault-key" }
+
+// Environment variable
+export API_KEY="prod-key"
+
+// Result:
+config.api_key === "prod-key" // Environment wins
+```
+
+### Legacy Configuration (Deprecated)
+
+For backward compatibility, you can use the legacy flat configuration:
+
+```typescript
+secrets: {
+  provider: "vault",
+  vaultUrl: "https://vault.example.com",
+  vaultToken: process.env.VAULT_TOKEN,
+  vaultPath: "myapp/config",
+}
+```
+
+⚠️ **Legacy config only supports token auth.** Use the new structured config for AppRole support.
+
+### Setting Up Vault
+
+**1. Enable KV v2 Secrets Engine:**
+```bash
+vault secrets enable -path=secret kv-v2
+```
+
+**2. Write Secrets:**
+```bash
+vault kv put secret/myapp/config \
+  database_password="secret123" \
+  api_key="key-xyz"
+```
+
+**3. Create Token (Dev/Testing):**
+```bash
+vault token create -policy=myapp-read
+```
+
+**4. Configure AppRole (Production):**
+```bash
+# Enable AppRole
+vault auth enable approle
+
+# Create role
+vault write auth/approle/role/myapp \
+  token_policies="myapp-read" \
+  token_ttl=1h \
+  token_max_ttl=4h
+
+# Get role_id
+vault read auth/approle/role/myapp/role-id
+
+# Generate secret_id
+vault write -f auth/approle/role/myapp/secret-id
+```
+
+### Error Handling
+
+Vault errors are wrapped in `ConfigSecretError`:
+
+```typescript
+import { ConfigSecretError } from "@yedoma-labs/turar-config";
+
+try {
+  const config = await createConfig({
+    schema: { api_key: eg.string().required() },
+    secrets: { provider: "vault", /* ... */ },
+  });
+} catch (error) {
+  if (error instanceof ConfigSecretError) {
+    console.error("Vault error:", error.message);
+    // Handle: connection failure, auth error, missing secrets, etc.
+  }
+}
+```
+
+### Security Best Practices
+
+✅ **Never commit tokens** - Use environment variables  
+✅ **Use AppRole in production** - More secure than long-lived tokens  
+✅ **Rotate secrets regularly** - Vault supports automatic rotation  
+✅ **Use short TTLs** - Limit token lifetime  
+✅ **Enable audit logging** - Track all secret access  
+✅ **Use namespaces** - Isolate environments (Vault Enterprise)  
+
+### Troubleshooting
+
+**Connection Refused:**
+```bash
+# Check Vault is running
+curl -s https://vault.example.com/v1/sys/health
+
+# Check network connectivity
+telnet vault.example.com 8200
+```
+
+**Permission Denied:**
+```bash
+# Verify token has read permissions
+vault token lookup
+
+# Check policy allows reading the path
+vault policy read myapp-read
+```
+
+**Secrets Not Found:**
+```bash
+# Verify secrets exist
+vault kv get secret/myapp/config
+
+# Check mount path is correct
+vault secrets list
+```
+
+### Complete Example
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfig, ConfigSecretError } from "@yedoma-labs/turar-config";
+
+async function loadConfig() {
+  try {
+    const config = await createConfig({
+      schema: {
+        // From config files
+        server_port: eg.port().default(3000),
+        server_host: eg.string().default("0.0.0.0"),
+        
+        // From Vault
+        database_host: eg.string().required(),
+        database_port: eg.port().required(),
+        database_username: eg.string().required(),
+        database_password: eg.string().required(),
+        api_key: eg.string().required(),
+      },
+      configDir: "./config",
+      secrets: {
+        provider: "vault",
+        vault: {
+          url: process.env.VAULT_ADDR || "http://localhost:8200",
+          auth: {
+            type: "appRole",
+            roleId: process.env.VAULT_ROLE_ID!,
+            secretId: process.env.VAULT_SECRET_ID!,
+          },
+          path: `myapp/${process.env.NODE_ENV}/config`,
+          namespace: process.env.VAULT_NAMESPACE,
+        },
+      },
+    });
+
+    console.log("✅ Configuration loaded successfully");
+    return config;
+  } catch (error) {
+    if (error instanceof ConfigSecretError) {
+      console.error("❌ Vault error:", error.message);
+      process.exit(1);
+    }
+    throw error;
+  }
+}
+
+const config = await loadConfig();
+
+// Use config
+const app = express();
+app.listen(config.server_port);
+```
+
 ## Roadmap
 
-- [ ] HashiCorp Vault integration
+- [x] **HashiCorp Vault integration** ✅
 - [ ] AWS Secrets Manager support
 - [x] **YAML config file support** ✅
 - [x] **TOML config file support** ✅

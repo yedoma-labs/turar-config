@@ -7,13 +7,11 @@ import { ConfigSecretError, createConfig, createConfigSync } from "../src/index.
 
 describe("Coverage Gap Tests", () => {
 	describe("Secrets Provider", () => {
-		it("throws ConfigSecretError for vault provider", async () => {
-			await expect(loadSecrets({ provider: "vault", path: "secret/app" })).rejects.toThrow(
-				ConfigSecretError,
-			);
+		it("throws ConfigSecretError for vault provider with missing config", async () => {
+			await expect(loadSecrets({ provider: "vault" })).rejects.toThrow(ConfigSecretError);
 
-			await expect(loadSecrets({ provider: "vault", path: "secret/app" })).rejects.toThrow(
-				"HashiCorp Vault provider not yet implemented",
+			await expect(loadSecrets({ provider: "vault" })).rejects.toThrow(
+				"Vault configuration missing",
 			);
 		});
 

@@ -18,6 +18,10 @@ export type {
 	ConfigResult,
 	CreateConfigOptions,
 	SecretsProviderConfig,
+	VaultAuth,
+	VaultAuthAppRole,
+	VaultAuthToken,
+	VaultConfig,
 	WatchConfigOptions,
 } from "./types.js";
 

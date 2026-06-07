@@ -1,10 +1,34 @@
 import type { InferEnv, SchemaDefinition } from "@yedoma-labs/bylyt-env-guard";
 
+export interface VaultAuthToken {
+	type: "token";
+	token: string;
+}
+
+export interface VaultAuthAppRole {
+	type: "appRole";
+	roleId: string;
+	secretId: string;
+}
+
+export type VaultAuth = VaultAuthToken | VaultAuthAppRole;
+
+export interface VaultConfig {
+	url: string;
+	auth: VaultAuth;
+	path: string;
+	mountPath?: string;
+	namespace?: string;
+}
+
 export interface SecretsProviderConfig {
 	provider: "env" | "vault";
+	// Legacy fields (deprecated, use vault config object)
 	vaultUrl?: string;
 	vaultToken?: string;
 	vaultPath?: string;
+	// New structured config
+	vault?: VaultConfig;
 }
 
 export interface CreateConfigOptions<T extends SchemaDefinition> {
