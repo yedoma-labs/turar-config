@@ -1,7 +1,22 @@
+const MAX_DEPTH = 100;
+const DANGEROUS_KEYS = ["__proto__", "constructor", "prototype"];
+
 export function deepMerge(
 	target: Record<string, unknown>,
 	...sources: Record<string, unknown>[]
 ): Record<string, unknown> {
+	return deepMergeWithDepth(target, 0, ...sources);
+}
+
+function deepMergeWithDepth(
+	target: Record<string, unknown>,
+	depth: number,
+	...sources: Record<string, unknown>[]
+): Record<string, unknown> {
+	if (depth > MAX_DEPTH) {
+		throw new Error("Maximum merge depth exceeded (possible circular reference)");
+	}
+
 	if (sources.length === 0) {
 		return target;
 	}
@@ -10,6 +25,11 @@ export function deepMerge(
 
 	for (const source of sources) {
 		for (const [key, value] of Object.entries(source)) {
+			// Prevent prototype pollution
+			if (DANGEROUS_KEYS.includes(key)) {
+				continue;
+			}
+
 			if (value === undefined) {
 				continue;
 			}
@@ -17,8 +37,9 @@ export function deepMerge(
 			const targetValue = result[key];
 
 			if (isPlainObject(value) && isPlainObject(targetValue)) {
-				result[key] = deepMerge(
+				result[key] = deepMergeWithDepth(
 					targetValue as Record<string, unknown>,
+					depth + 1,
 					value as Record<string, unknown>,
 				);
 			} else {

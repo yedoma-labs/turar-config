@@ -28,6 +28,13 @@ export async function createConfig<T extends SchemaDefinition>(
 
 	const environment = process.env.NODE_ENV;
 
+	// Validate environment name
+	if (environment && !/^[a-zA-Z0-9_-]+$/.test(environment)) {
+		throw new Error(
+			"Invalid NODE_ENV value - must be alphanumeric with hyphens/underscores only",
+		);
+	}
+
 	const { base, environment: envConfig } = loadConfigFiles(configDir, environment);
 
 	let merged = deepMerge({}, base, envConfig);
@@ -77,6 +84,13 @@ export function createConfigSync<T extends SchemaDefinition>(
 	}
 
 	const environment = process.env.NODE_ENV;
+
+	// Validate environment name
+	if (environment && !/^[a-zA-Z0-9_-]+$/.test(environment)) {
+		throw new Error(
+			"Invalid NODE_ENV value - must be alphanumeric with hyphens/underscores only",
+		);
+	}
 
 	const { base, environment: envConfig } = loadConfigFiles(configDir, environment);
 

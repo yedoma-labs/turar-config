@@ -12,5 +12,9 @@ export async function loadSecrets(config: SecretsProviderConfig): Promise<Record
 		);
 	}
 
-	throw new ConfigSecretError(`Unknown secrets provider: ${config.provider}`);
+	const provider = config.provider as string;
+	const sanitizedProvider = provider.length > 50
+		? `${provider.substring(0, 47)}...`
+		: provider;
+	throw new ConfigSecretError(`Unknown secrets provider: ${sanitizedProvider}`);
 }
