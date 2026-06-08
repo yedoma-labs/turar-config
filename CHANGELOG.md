@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-08
+
+### Added
+
+- **AWS Secrets Manager integration** with loose coupling
+  - Optional dependency pattern (`@aws-sdk/client-secrets-manager`)
+  - Dynamic imports for zero overhead when not used
+  - Region configuration with validation (us-east-1, eu-west-2, etc.)
+  - Secret name validation (1-512 chars, alphanumeric + /_+=.@-)
+  - Custom endpoint support (LocalStack, testing)
+  - IAM role support (recommended) and explicit credentials
+  - Temporary credential support (sessionToken)
+  - Automatic secret flattening with underscore separator
+  - Array value preservation via JSON.stringify
+  - JSON-only secrets (binary not supported)
+  - Endpoint URL validation (http/https only, prevents SSRF)
+  - Error message sanitization (200 char limit)
+  - 15 comprehensive tests in aws-secrets-manager.test.ts
+- **Enhanced security test suite** (21 new tests in security-enhanced.test.ts)
+  - ReDoS prevention tests (large strings, nested braces, expansion attacks)
+  - Circular reference detection tests (direct cycles, array cycles, deep cycles)
+  - File size limit tests (reject >10MB, accept <10MB)
+  - Vault security tests (URL/path validation, SSRF prevention, depth limits)
+  - Separator validation tests
+  - Prototype pollution variation tests
+  - Windows path separator tests
+- **Comprehensive AWS Secrets Manager documentation**
+  - Complete configuration examples
+  - Security best practices
+  - LocalStack testing guide
+  - IAM policy examples
+  - Comparison with HashiCorp Vault
+
+### Changed
+
+- **Package dependencies restructure**
+  - `node-vault` moved to `optionalDependencies`
+  - `@aws-sdk/client-secrets-manager` added as `optionalDependencies`
+  - Pay-as-you-go dependency model (install only what you use)
+  - Clear error messages when optional package not installed
+- **Interpolation engine**: Manual parser replaces regex (faster, safer)
+- **Vault secret handling**: Arrays now JSON.stringify'd to preserve type info
+- **Watcher behavior**: Config always updates on successful reload (onChange errors don't rollback)
+- **Test coverage**: 149 → 185 tests (+36 tests)
+
+### Fixed
+
+- **Critical security vulnerabilities** (comprehensive security audit)
+  - **ReDoS prevention**: Replaced regex interpolation with manual parser (eliminates catastrophic backtracking)
+  - **Circular reference detection**: Added WeakSet-based cycle detection in interpolateObject
+  - **File size limits**: 10MB max file size check before reading (prevents OOM attacks)
+  - **Vault URL validation**: Only allow http/https protocols, validate hostname (prevents SSRF)
+  - **Vault path validation**: Block path traversal (..), only allow safe characters
+  - **Vault depth limits**: MAX_DEPTH=100 in flattenSecrets (prevents DoS)
+  - **Windows path traversal**: Explicit backslash rejection in environment names
+  - **Error message security**: Sanitize to first line only, 200 char limit (prevents info disclosure)
+  - **Watcher race conditions**: Proper error handler cleanup, stopped flag protection
+  - **Separator validation**: Non-empty, non-alphanumeric enforcement in flattenObject
+  - **Prototype pollution hardening**: Block ___proto__, __proto, CONSTRUCTOR, PROTOTYPE variations
+  - **Path sanitization**: Better ConfigFileError path display (basename + first 100 chars)
+- **Documentation fixes**
+  - Fixed missing imports in code examples
+  - Corrected import statements and priority order
+
 ## [0.2.0] - 2026-06-07
 
 ### Added
@@ -173,44 +237,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- **Critical security vulnerabilities** (comprehensive security audit)
-  - **ReDoS prevention**: Replaced regex interpolation with manual parser (eliminates catastrophic backtracking)
-  - **Circular reference detection**: Added WeakSet-based cycle detection in interpolateObject
-  - **File size limits**: 10MB max file size check before reading (prevents OOM attacks)
-  - **Vault URL validation**: Only allow http/https protocols, validate hostname (prevents SSRF)
-  - **Vault path validation**: Block path traversal (..), only allow safe characters
-  - **Vault depth limits**: MAX_DEPTH=100 in flattenSecrets (prevents DoS)
-  - **Windows path traversal**: Explicit backslash rejection in environment names
-  - **Error message security**: Sanitize to first line only, 200 char limit (prevents info disclosure)
-  - **Watcher race conditions**: Proper error handler cleanup, stopped flag protection
-  - **Separator validation**: Non-empty, non-alphanumeric enforcement in flattenObject
-  - **Prototype pollution hardening**: Block ___proto__, __proto, CONSTRUCTOR, PROTOTYPE variations
-  - **Path sanitization**: Better ConfigFileError path display (basename + first 100 chars)
-
-### Added
-
-- **Enhanced security test suite** (21 new tests in security-enhanced.test.ts)
-  - ReDoS prevention tests (large strings, nested braces, expansion attacks)
-  - Circular reference detection tests (direct cycles, array cycles, deep cycles)
-  - File size limit tests (reject >10MB, accept <10MB)
-  - Vault security tests (URL/path validation, SSRF prevention, depth limits)
-  - Separator validation tests
-  - Prototype pollution variation tests
-  - Windows path separator tests
-
-### Changed
-
-- **Interpolation engine**: Manual parser replaces regex (faster, safer)
-- **Vault secret handling**: Arrays now JSON.stringify'd to preserve type info
-- **Watcher behavior**: Config always updates on successful reload (onChange errors don't rollback)
-- **Test coverage**: 98.36% → 97.4% (170 tests, added edge case error paths)
-
 ### Planned
 
-- AWS Secrets Manager integration
 - Azure Key Vault integration
+- Google Cloud Secret Manager integration
 - Config migration helpers
 - Config validation CLI tool
 - Hot reload for production (optional)
@@ -221,6 +251,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Version Comparison
+
+### v0.3.0 vs v0.2.0
+
+**Major Additions:**
+- ✅ AWS Secrets Manager integration
+- ✅ Optional dependencies pattern (loose coupling)
+- ✅ 36 additional tests (security + AWS)
+- ✅ Enhanced security hardening (ReDoS, circular refs, file size limits)
+- ✅ Comprehensive AWS documentation
+
+**Statistics:**
+- Tests: 149 → 185 (+36)
+- Secrets Providers: 2 (env, vault) → 3 (env, vault, aws)
+- Optional Dependencies: 0 → 2 (@aws-sdk/client-secrets-manager, node-vault)
+- Security Tests: 28 → 49 (+21)
+
+**Breaking Changes:**
+- None - fully backward compatible
 
 ### v0.2.0 vs v0.1.0
 
@@ -251,6 +299,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Issue Tracker](https://github.com/yedoma-labs/turar-config/issues)
 - [Changelog](https://github.com/yedoma-labs/turar-config/blob/main/CHANGELOG.md)
 
+[0.3.0]: https://github.com/yedoma-labs/turar-config/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/yedoma-labs/turar-config/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/yedoma-labs/turar-config/releases/tag/v0.1.0
-[Unreleased]: https://github.com/yedoma-labs/turar-config/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/yedoma-labs/turar-config/compare/v0.3.0...HEAD
