@@ -14,6 +14,7 @@ export {
 	ConfigSecretError,
 } from "./errors.js";
 export type {
+	AWSSecretsManagerConfig,
 	ConfigChange,
 	ConfigResult,
 	CreateConfigOptions,

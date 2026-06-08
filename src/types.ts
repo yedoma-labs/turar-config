@@ -21,14 +21,27 @@ export interface VaultConfig {
 	namespace?: string;
 }
 
+export interface AWSSecretsManagerConfig {
+	region: string;
+	secretName: string;
+	// Optional: custom endpoint for LocalStack or other testing
+	endpoint?: string;
+	// Optional: explicit credentials (use IAM roles in production)
+	accessKeyId?: string;
+	secretAccessKey?: string;
+	// Optional: session token for temporary credentials
+	sessionToken?: string;
+}
+
 export interface SecretsProviderConfig {
-	provider: "env" | "vault";
+	provider: "env" | "vault" | "aws-secrets-manager";
 	// Legacy fields (deprecated, use vault config object)
 	vaultUrl?: string;
 	vaultToken?: string;
 	vaultPath?: string;
 	// New structured config
 	vault?: VaultConfig;
+	aws?: AWSSecretsManagerConfig;
 }
 
 export interface CreateConfigOptions<T extends SchemaDefinition> {
