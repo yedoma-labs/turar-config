@@ -19,12 +19,12 @@ Type-safe configuration management with file loading, environment cascading, and
 
 - 📁 **Multi-format config** - JSON, YAML, TOML support with auto-detection
 - 🌍 **Environment cascading** - Merge `default` → `{NODE_ENV}` → env vars
-- 🔒 **Secrets integration** - HashiCorp Vault (token + AppRole), `.env` files
+- 🔒 **Secrets integration** - HashiCorp Vault, AWS Secrets Manager, `.env` files
 - 🔐 **Type-safe** - Full TypeScript inference from schema
 - ✅ **Validation** - Uses bylyt-env-guard's zero-dependency validation
 - 🔗 **Interpolation** - Reference env vars with `${VAR}` syntax in config files
 - 🔥 **Hot reload** - File watching with debouncing for development
-- 🚀 **Minimal dependencies** - Only node-vault for Vault support
+- 🎯 **Loose coupling** - Optional dependencies for cloud integrations (AWS SDK, Vault)
 
 ## Installation
 
@@ -1272,10 +1272,335 @@ const app = express();
 app.listen(config.server_port);
 ```
 
+## AWS Secrets Manager Integration
+
+Load secrets from AWS Secrets Manager at runtime. Supports IAM roles, explicit credentials, and custom endpoints.
+
+### Installation
+
+AWS Secrets Manager integration requires the AWS SDK:
+
+```bash
+npm install @aws-sdk/client-secrets-manager
+# or
+pnpm add @aws-sdk/client-secrets-manager
+```
+
+> **Note:** This is an **optional dependency**. Only install if you use AWS Secrets Manager.
+
+### Quick Start
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfig } from "@yedoma-labs/turar-config";
+
+const config = await createConfig({
+  schema: {
+    database_host: eg.string().required(),
+    database_password: eg.string().required(),
+    api_key: eg.string().required(),
+  },
+  configDir: "./config",
+  secrets: {
+    provider: "aws-secrets-manager",
+    aws: {
+      region: "us-east-1",
+      secretName: "myapp/production/config",
+    },
+  },
+});
+
+console.log(config.database_password); // Secret from AWS
+```
+
+### IAM Role Authentication (Recommended)
+
+In production, use IAM roles instead of explicit credentials:
+
+```typescript
+const config = await createConfig({
+  schema: { /* ... */ },
+  secrets: {
+    provider: "aws-secrets-manager",
+    aws: {
+      region: "us-east-1",
+      secretName: "myapp/production/config",
+      // No credentials needed - uses IAM role
+    },
+  },
+});
+```
+
+**IAM Policy Example:**
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": [
+      "secretsmanager:GetSecretValue"
+    ],
+    "Resource": "arn:aws:secretsmanager:us-east-1:123456789012:secret:myapp/*"
+  }]
+}
+```
+
+### Explicit Credentials
+
+For development or CI/CD:
+
+```typescript
+const config = await createConfig({
+  schema: { /* ... */ },
+  secrets: {
+    provider: "aws-secrets-manager",
+    aws: {
+      region: "us-east-1",
+      secretName: "myapp/dev/config",
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+});
+```
+
+### Temporary Credentials
+
+For assumed roles or session tokens:
+
+```typescript
+aws: {
+  region: "us-east-1",
+  secretName: "myapp/config",
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  sessionToken: process.env.AWS_SESSION_TOKEN,
+}
+```
+
+### LocalStack Testing
+
+Test with LocalStack locally:
+
+```typescript
+const config = await createConfig({
+  schema: { /* ... */ },
+  secrets: {
+    provider: "aws-secrets-manager",
+    aws: {
+      region: "us-east-1",
+      secretName: "test/config",
+      endpoint: "http://localhost:4566", // LocalStack endpoint
+      accessKeyId: "test",
+      secretAccessKey: "test",
+    },
+  },
+});
+```
+
+**Docker Compose for LocalStack:**
+```yaml
+services:
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      - SERVICES=secretsmanager
+    ports:
+      - "4566:4566"
+```
+
+### Configuration Options
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `region` | `string` | Yes | AWS region (e.g., `us-east-1`, `eu-west-2`) |
+| `secretName` | `string` | Yes | Secret name or ARN |
+| `endpoint` | `string` | No | Custom endpoint (for LocalStack/testing) |
+| `accessKeyId` | `string` | No | AWS access key (use IAM roles instead) |
+| `secretAccessKey` | `string` | No | AWS secret key (use IAM roles instead) |
+| `sessionToken` | `string` | No | Session token for temporary credentials |
+
+### Secret Format
+
+AWS secrets must be **JSON objects**:
+
+```json
+{
+  "database_host": "prod-db.example.com",
+  "database_password": "secret123",
+  "api_key": "key-xyz"
+}
+```
+
+**Nested secrets are automatically flattened:**
+```json
+{
+  "database": {
+    "host": "prod-db.example.com",
+    "credentials": {
+      "username": "admin",
+      "password": "secret123"
+    }
+  }
+}
+```
+
+**Becomes:**
+```typescript
+config.database_host              // "prod-db.example.com"
+config.database_credentials_username  // "admin"
+config.database_credentials_password  // "secret123"
+```
+
+### Priority Order
+
+AWS secrets have the same priority as Vault:
+
+```
+Environment Variables (highest priority)
+       ↓
+  .env file
+       ↓
+  AWS Secrets
+       ↓
+Config Files (lowest priority)
+```
+
+### Security Best Practices
+
+✅ **Use IAM roles** - Don't hardcode credentials  
+✅ **Enable secret rotation** - Automatic password rotation  
+✅ **Use KMS encryption** - Encrypt secrets at rest  
+✅ **Least privilege** - Only grant `GetSecretValue` permission  
+✅ **Use resource tags** - Organize and control access  
+✅ **Enable CloudTrail** - Audit all secret access  
+✅ **Short-lived credentials** - Use temporary session tokens  
+
+### Error Handling
+
+```typescript
+import { ConfigSecretError } from "@yedoma-labs/turar-config";
+
+try {
+  const config = await createConfig({
+    schema: { api_key: eg.string().required() },
+    secrets: {
+      provider: "aws-secrets-manager",
+      aws: { region: "us-east-1", secretName: "app/config" },
+    },
+  });
+} catch (error) {
+  if (error instanceof ConfigSecretError) {
+    console.error("AWS error:", error.message);
+    // Handle: permission denied, secret not found, etc.
+  }
+}
+```
+
+### Common Errors
+
+**AccessDeniedException:**
+```
+Failed to load secrets from AWS Secrets Manager: 
+User is not authorized to perform secretsmanager:GetSecretValue
+```
+**Fix:** Attach IAM policy with `GetSecretValue` permission.
+
+**ResourceNotFoundException:**
+```
+Failed to load secrets from AWS Secrets Manager:
+Secrets Manager can't find the specified secret
+```
+**Fix:** Verify secret name and region.
+
+**InvalidRequestException:**
+```
+AWS Secrets Manager secret 'myapp/config' is not valid JSON
+```
+**Fix:** Ensure secret contains valid JSON object.
+
+### Creating Secrets
+
+**CLI:**
+```bash
+aws secretsmanager create-secret \
+  --name myapp/production/config \
+  --secret-string '{"database_password":"secret123","api_key":"key-xyz"}'
+```
+
+**Console:**
+1. Go to AWS Secrets Manager
+2. Click "Store a new secret"
+3. Select "Other type of secret"
+4. Add key-value pairs
+5. Name: `myapp/production/config`
+6. Enable automatic rotation (optional)
+
+### Comparison: AWS vs Vault
+
+| Feature | AWS Secrets Manager | HashiCorp Vault |
+|---------|---------------------|------------------|
+| **Cloud native** | ✅ AWS only | ✅ Any cloud/on-prem |
+| **Managed service** | ✅ Fully managed | ❌ Self-hosted |
+| **Auto rotation** | ✅ Built-in | ✅ Supported |
+| **Cost** | $0.40/secret/month + API calls | Infrastructure + maintenance |
+| **Setup** | Easy (IAM) | Complex (install, configure) |
+| **Access control** | IAM policies | ACL policies |
+| **Best for** | AWS-native apps | Multi-cloud, on-prem |
+
+### Complete Example
+
+```typescript
+import { eg } from "@yedoma-labs/bylyt-env-guard";
+import { createConfig, ConfigSecretError } from "@yedoma-labs/turar-config";
+
+async function loadConfig() {
+  try {
+    const config = await createConfig({
+      schema: {
+        // From config files
+        server_port: eg.port().default(3000),
+        server_host: eg.string().default("0.0.0.0"),
+        
+        // From AWS Secrets Manager
+        database_host: eg.string().required(),
+        database_port: eg.port().required(),
+        database_username: eg.string().required(),
+        database_password: eg.string().required(),
+        api_key: eg.string().required(),
+      },
+      configDir: "./config",
+      secrets: {
+        provider: "aws-secrets-manager",
+        aws: {
+          region: process.env.AWS_REGION || "us-east-1",
+          secretName: `myapp/${process.env.NODE_ENV}/config`,
+        },
+      },
+    });
+
+    console.log("✅ Configuration loaded successfully");
+    return config;
+  } catch (error) {
+    if (error instanceof ConfigSecretError) {
+      console.error("❌ AWS Secrets Manager error:", error.message);
+      process.exit(1);
+    }
+    throw error;
+  }
+}
+
+const config = await loadConfig();
+
+// Use config
+const app = express();
+app.listen(config.server_port);
+```
+
 ## Roadmap
 
 - [x] **HashiCorp Vault integration** ✅
-- [ ] AWS Secrets Manager support
+- [x] **AWS Secrets Manager support** ✅
 - [x] **YAML config file support** ✅
 - [x] **TOML config file support** ✅
 - [x] **Config file watching / hot reload** ✅
