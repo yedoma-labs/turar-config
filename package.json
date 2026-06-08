@@ -1,6 +1,6 @@
 {
   "name": "@yedoma-labs/turar-config",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Type-safe configuration management with file loading, environment cascading, and secrets integration - extends bylyt-env-guard",
   "type": "module",
   "main": "./dist/index.cjs",
