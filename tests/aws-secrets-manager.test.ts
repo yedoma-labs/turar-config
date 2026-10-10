@@ -1,6 +1,5 @@
 import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConfigSecretError } from "../src/errors.js";
 import { createConfig } from "../src/index.js";
 
 // Create mock client

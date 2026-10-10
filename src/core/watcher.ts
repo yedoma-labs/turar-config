@@ -39,14 +39,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 	let debounceTimer: NodeJS.Timeout | null = null;
 	let stopped = false;
 	let errorHandler: ((error: Error) => void) | null = null;
-
-	// Load initial config with error handling
-	try {
-		currentConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
-	} catch (error) {
-		// If initial load fails, re-throw (watcher not created yet, no cleanup needed)
-		throw error;
-	}
+	currentConfig = await loadConfig(schema, configDir, envFile, secrets, prefix, strict);
 
 	// Set up file watcher
 	const resolvedConfigDir = resolve(configDir);

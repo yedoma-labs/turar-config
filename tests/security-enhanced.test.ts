@@ -19,7 +19,7 @@ vi.mock("node-vault", () => ({
 }));
 
 describe("Enhanced Security Tests", () => {
-	let mockVaultClient: any;
+	let mockVaultClient: Record<string, ReturnType<typeof vi.fn>>;
 
 	beforeEach(async () => {
 		mockVaultClient = {
@@ -85,7 +85,7 @@ describe("Enhanced Security Tests", () => {
 	describe("Circular Reference Detection", () => {
 		it("detects circular references in objects", () => {
 			const env = { VAR: "value" };
-			const obj: any = { a: 1 };
+			const obj: Record<string, unknown> = { a: 1 };
 			obj.circular = obj; // Create cycle
 
 			expect(() => interpolateObject(obj, env)).toThrow(ConfigInterpolationError);
@@ -94,7 +94,7 @@ describe("Enhanced Security Tests", () => {
 
 		it("detects circular references through arrays", () => {
 			const env = { VAR: "value" };
-			const obj: any = { arr: [] };
+			const obj: { arr: unknown[] } = { arr: [] };
 			const nested = { ref: obj };
 			obj.arr.push(nested); // Create cycle through array
 
@@ -103,7 +103,7 @@ describe("Enhanced Security Tests", () => {
 
 		it("detects deep circular references", () => {
 			const env = { VAR: "value" };
-			const obj: any = { a: { b: { c: {} } } };
+			const obj: { a: { b: { c: Record<string, unknown> } } } = { a: { b: { c: {} } } };
 			obj.a.b.c.back = obj; // Deep cycle
 
 			expect(() => interpolateObject(obj, env)).toThrow(ConfigInterpolationError);
@@ -141,13 +141,13 @@ describe("Enhanced Security Tests", () => {
 			mkdirSync(testDir, { recursive: true });
 
 			// Create a file under 10MB but with small string values (< 10k per string)
-			const data: any = {};
+			const data: Record<string, unknown> = {};
 			for (let i = 0; i < 1000; i++) {
 				data[`key${i}`] = "x".repeat(5000); // 5KB per value
 			}
 			writeFileSync(join(testDir, "default.json"), JSON.stringify(data));
 
-			const schema: any = {};
+			const schema: Record<string, unknown> = {};
 			for (let i = 0; i < 1000; i++) {
 				schema[`key${i}`] = eg.string().optional();
 			}
@@ -278,7 +278,7 @@ describe("Enhanced Security Tests", () => {
 
 		it("handles deeply nested vault secrets", async () => {
 			// Create deeply nested structure at max depth
-			let nested: any = { value: "deep" };
+			let nested: Record<string, unknown> = { value: "deep" };
 			for (let i = 0; i < 99; i++) {
 				nested = { level: nested };
 			}
@@ -308,7 +308,7 @@ describe("Enhanced Security Tests", () => {
 
 		it("rejects vault secrets exceeding max depth", async () => {
 			// Create deeply nested structure beyond max depth
-			let nested: any = { value: "too-deep" };
+			let nested: Record<string, unknown> = { value: "too-deep" };
 			for (let i = 0; i < 101; i++) {
 				nested = { level: nested };
 			}
@@ -391,7 +391,7 @@ describe("Enhanced Security Tests", () => {
 			expect(Object.hasOwn(result, "___proto__")).toBe(false);
 			expect(Object.hasOwn(result, "__proto")).toBe(false);
 			// Prototype should not be polluted
-			expect((result as any).polluted).toBeUndefined();
+			expect((result as Record<string, unknown>).polluted).toBeUndefined();
 		});
 
 		it("blocks constructor variations", () => {
