@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/yedoma-labs/turar-config/compare/v0.3.0...v0.3.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** override vulnerable transitive dependencies ([#3](https://github.com/yedoma-labs/turar-config/issues/3)) ([b3c5f0a](https://github.com/yedoma-labs/turar-config/commit/b3c5f0aed2dfe6a3784dca9b0334cd747be2b229))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
