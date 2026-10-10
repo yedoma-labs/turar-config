@@ -38,7 +38,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 	let watcher: FSWatcher | null = null;
 	let debounceTimer: NodeJS.Timeout | null = null;
 	let stopped = false;
-	let errorHandler: ((error: Error) => void) | null = null;
+	let errorHandler: ((error: unknown) => void) | null = null;
 
 	// Load initial config with error handling
 	try {
@@ -50,16 +50,13 @@ export async function watchConfig<T extends SchemaDefinition>(
 
 	// Set up file watcher
 	const resolvedConfigDir = resolve(configDir);
-	const watchPatterns = [
-		`${resolvedConfigDir}/**/*.json`,
-		`${resolvedConfigDir}/**/*.yaml`,
-		`${resolvedConfigDir}/**/*.yml`,
-		`${resolvedConfigDir}/**/*.toml`,
-	];
+	// chokidar 4+ dropped glob support, so watch the directory and filter by extension.
+	const configExtensions = /\.(json|ya?ml|toml)$/;
 
-	watcher = watch(watchPatterns, {
+	watcher = watch(resolvedConfigDir, {
 		ignoreInitial,
 		persistent: true,
+		ignored: (path, stats) => stats?.isFile() === true && !configExtensions.test(path),
 		awaitWriteFinish: {
 			stabilityThreshold: 100,
 			pollInterval: 50,
@@ -115,7 +112,7 @@ export async function watchConfig<T extends SchemaDefinition>(
 	watcher.on("change", (path) => handleChange("changed", path));
 	watcher.on("unlink", (path) => handleChange("removed", path));
 
-	errorHandler = (error: Error) => {
+	errorHandler = (error: unknown) => {
 		console.error("[turar-config] Watcher error:", error);
 	};
 	watcher.on("error", errorHandler);
