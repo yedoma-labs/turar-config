@@ -16,21 +16,23 @@ describe("Coverage Gap Tests", () => {
 		});
 
 		it("throws ConfigSecretError for unknown provider", async () => {
-			await expect(loadSecrets({ provider: "unknown" as any })).rejects.toThrow(ConfigSecretError);
+			await expect(loadSecrets({ provider: "unknown" as never })).rejects.toThrow(
+				ConfigSecretError,
+			);
 
-			await expect(loadSecrets({ provider: "unknown" as any })).rejects.toThrow(
+			await expect(loadSecrets({ provider: "unknown" as never })).rejects.toThrow(
 				"Unknown secrets provider",
 			);
 		});
 
 		it("sanitizes long provider names in error", async () => {
 			const longProvider = "a".repeat(100);
-			await expect(loadSecrets({ provider: longProvider as any })).rejects.toThrow(
+			await expect(loadSecrets({ provider: longProvider as never })).rejects.toThrow(
 				ConfigSecretError,
 			);
 
 			try {
-				await loadSecrets({ provider: longProvider as any });
+				await loadSecrets({ provider: longProvider as never });
 			} catch (error) {
 				if (error instanceof ConfigSecretError) {
 					// Should be truncated to 50 chars

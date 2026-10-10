@@ -15,7 +15,7 @@ vi.mock("node-vault", () => {
 });
 
 describe("Coverage Boost Tests", () => {
-	let mockVaultClient: any;
+	let mockVaultClient: Record<string, ReturnType<typeof vi.fn>>;
 
 	beforeEach(async () => {
 		mockVaultClient = {
@@ -266,7 +266,7 @@ describe("Coverage Boost Tests", () => {
 			const result = deepMerge(target, { data: nullProtoObj });
 
 			expect(result.data).toBeDefined();
-			expect((result.data as any).nested).toBe("value");
+			expect((result.data as Record<string, unknown>).nested).toBe("value");
 		});
 
 		it("flattens objects with null prototype", () => {
