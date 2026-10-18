@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/yedoma-labs/turar-config/compare/v0.3.1...v0.3.2) (2026-10-18)
+
+
+### Bug Fixes
+
+* **watcher:** migrate to chokidar 5 directory watch ([#6](https://github.com/yedoma-labs/turar-config/issues/6)) ([6f6bc00](https://github.com/yedoma-labs/turar-config/commit/6f6bc0083dad51a3a5567224be28f7aec53a0207))
+
 ## [0.3.1](https://github.com/yedoma-labs/turar-config/compare/v0.3.0...v0.3.1) (2026-10-10)
 
 
