@@ -1,5 +1,5 @@
 import { ConfigSecretError } from "../errors.js";
-import type { AWSSecretsManagerConfig, SecretsProviderConfig, VaultConfig } from "../types.js";
+import type { SecretsProviderConfig, VaultConfig } from "../types.js";
 
 const MAX_DEPTH = 100;
 const ENV_PROVIDER = "env" as const;
