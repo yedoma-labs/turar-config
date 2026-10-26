@@ -1,3 +1,10 @@
+## [0.3.4](https://github.com/yedoma-labs/turar-config/compare/v0.3.3...v0.3.4) (2026-10-26)
+
+
+### Bug Fixes
+
+* **build:** keep typescript 7 by enabling isolatedDeclarations for tsdown ([#11](https://github.com/yedoma-labs/turar-config/issues/11)) ([7612ff8](https://github.com/yedoma-labs/turar-config/commit/7612ff83b1e56a83c1dd796d69965e124ea5b073))
+
 ## [0.3.3](https://github.com/yedoma-labs/turar-config/compare/v0.3.2...v0.3.3) (2026-10-26)
 
 
