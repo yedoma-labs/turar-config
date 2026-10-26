@@ -73,7 +73,7 @@ const port = config.server_port; // number (auto-coerced)
 ✅ **Validation** - Fail fast on invalid config  
 ✅ **Type coercion** - Automatic string → number conversion  
 ✅ **Environment cascading** - Different configs per environment  
-✅ **No runtime errors** - Required values checked at startup  
+✅ **No runtime errors** - Required values checked at startup
 
 ---
 
@@ -116,11 +116,11 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
-  schema: {
-    database_host: eg.string().required(),
-    database_port: eg.port().default(5432),
-  },
-  configDir: "./config",
+	schema: {
+		database_host: eg.string().required(),
+		database_port: eg.port().default(5432),
+	},
+	configDir: "./config",
 });
 
 // Fully typed!
@@ -130,13 +130,13 @@ const dbPort = config.database_port; // number
 
 ### Key Differences
 
-| Feature | node-config | turar-config |
-|---------|------------|--------------|
-| **Type safety** | No | Yes (TypeScript) |
-| **Validation** | Manual | Built-in with schema |
-| **Env vars** | Custom variables only | Full integration |
-| **Nested access** | `get('a.b.c')` | Flattened: `a_b_c` |
-| **Performance** | Dynamic lookup | Pre-validated object |
+| Feature           | node-config           | turar-config         |
+| ----------------- | --------------------- | -------------------- |
+| **Type safety**   | No                    | Yes (TypeScript)     |
+| **Validation**    | Manual                | Built-in with schema |
+| **Env vars**      | Custom variables only | Full integration     |
+| **Nested access** | `get('a.b.c')`        | Flattened: `a_b_c`   |
+| **Performance**   | Dynamic lookup        | Pre-validated object |
 
 ---
 
@@ -205,24 +205,24 @@ const port = config.port; // number (guaranteed)
 ### Before (convict)
 
 ```javascript
-const convict = require('convict');
+const convict = require("convict");
 
 const config = convict({
-  env: {
-    format: ['production', 'development', 'test'],
-    default: 'development',
-    env: 'NODE_ENV'
-  },
-  port: {
-    format: 'port',
-    default: 3000,
-    env: 'PORT'
-  }
+	env: {
+		format: ["production", "development", "test"],
+		default: "development",
+		env: "NODE_ENV",
+	},
+	port: {
+		format: "port",
+		default: 3000,
+		env: "PORT",
+	},
 });
 
-config.validate({ allowed: 'strict' });
+config.validate({ allowed: "strict" });
 
-const port = config.get('port');
+const port = config.get("port");
 ```
 
 ### After (turar-config)
@@ -232,13 +232,12 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
-  schema: {
-    env: eg.enum(['production', 'development', 'test'] as const)
-      .default('development'),
-    port: eg.port().default(3000),
-  },
-  configDir: "./config",
-  strict: true, // Equivalent to allowed: 'strict'
+	schema: {
+		env: eg.enum(["production", "development", "test"] as const).default("development"),
+		port: eg.port().default(3000),
+	},
+	configDir: "./config",
+	strict: true, // Equivalent to allowed: 'strict'
 });
 
 const port = config.port; // number
@@ -246,15 +245,15 @@ const port = config.port; // number
 
 ### Schema Mapping
 
-| convict format | turar-config (bylyt) |
-|---------------|---------------------|
-| `'int'` | `eg.integer()` |
-| `'port'` | `eg.port()` |
-| `'url'` | `eg.url()` |
-| `['a','b']` | `eg.enum(['a','b'] as const)` |
-| `'email'` | `eg.email()` |
-| `'boolean'` | `eg.boolean()` |
-| `'String'` | `eg.string()` |
+| convict format | turar-config (bylyt)          |
+| -------------- | ----------------------------- |
+| `'int'`        | `eg.integer()`                |
+| `'port'`       | `eg.port()`                   |
+| `'url'`        | `eg.url()`                    |
+| `['a','b']`    | `eg.enum(['a','b'] as const)` |
+| `'email'`      | `eg.email()`                  |
+| `'boolean'`    | `eg.boolean()`                |
+| `'String'`     | `eg.string()`                 |
 
 ---
 
@@ -292,22 +291,24 @@ If you were using custom env var names:
 
 ```javascript
 // Before
-process.env.DB_HOST
-process.env.DATABASE_PORT
+process.env.DB_HOST;
+process.env.DATABASE_PORT;
 
 // After - use prefix to maintain compatibility
 const config = createConfigSync({
-  schema: { database_host: eg.string(), database_port: eg.port() },
-  prefix: "DB_",  // Reads DB_database_host, DB_database_port
+	schema: { database_host: eg.string(), database_port: eg.port() },
+	prefix: "DB_", // Reads DB_database_host, DB_database_port
 });
 
 // Or map manually in sources
 const config = createConfigSync({
-  schema: { database_host: eg.string(), database_port: eg.port() },
-  sources: [{
-    database_host: process.env.DB_HOST,
-    database_port: process.env.DATABASE_PORT,
-  }],
+	schema: { database_host: eg.string(), database_port: eg.port() },
+	sources: [
+		{
+			database_host: process.env.DB_HOST,
+			database_port: process.env.DATABASE_PORT,
+		},
+	],
 });
 ```
 
@@ -362,10 +363,12 @@ Run old and new configs in parallel during migration:
 
 ```typescript
 // migration-test.ts
-import oldConfig from './old-config-loader';
-import { createConfigSync } from '@yedoma-labs/turar-config';
+import oldConfig from "./old-config-loader";
+import { createConfigSync } from "@yedoma-labs/turar-config";
 
-const newConfig = createConfigSync({/* ... */});
+const newConfig = createConfigSync({
+	/* ... */
+});
 
 // Compare values
 console.assert(oldConfig.database.host === newConfig.database_host);
@@ -387,8 +390,8 @@ const { database_host, database_port } = config;
 
 // Or create a helper
 const db = {
-  host: config.database_host,
-  port: config.database_port,
+	host: config.database_host,
+	port: config.database_port,
 };
 ```
 
@@ -400,7 +403,7 @@ const db = {
 
 ```typescript
 // Avoid dynamic access - define all keys in schema
-const key = someCondition ? 'primary_db' : 'secondary_db';
+const key = someCondition ? "primary_db" : "secondary_db";
 const db = config[key]; // Type error - good! Catch at compile time
 ```
 
@@ -412,11 +415,11 @@ const db = config[key]; // Type error - good! Catch at compile time
 
 ```typescript
 // Old: "3000" (string)
-process.env.PORT
+process.env.PORT;
 
 // New: 3000 (number)
 const config = createConfigSync({
-  schema: { port: eg.integer() }, // Auto-coerces "3000" → 3000
+	schema: { port: eg.integer() }, // Auto-coerces "3000" → 3000
 });
 ```
 

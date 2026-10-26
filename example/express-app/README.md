@@ -30,9 +30,9 @@ NODE_ENV=production \
 
 ```json
 {
-  "server": { "port": 3000, "host": "0.0.0.0" },
-  "database": { "host": "localhost", "port": 5432, "name": "myapp_dev" },
-  "redis": { "url": "redis://localhost:6379" }
+	"server": { "port": 3000, "host": "0.0.0.0" },
+	"database": { "host": "localhost", "port": 5432, "name": "myapp_dev" },
+	"redis": { "url": "redis://localhost:6379" }
 }
 ```
 
@@ -40,9 +40,9 @@ NODE_ENV=production \
 
 ```json
 {
-  "server": { "port": 8080 },
-  "database": { "host": "${DB_HOST}", "name": "${DB_NAME}" },
-  "redis": { "url": "${REDIS_URL}" }
+	"server": { "port": 8080 },
+	"database": { "host": "${DB_HOST}", "name": "${DB_NAME}" },
+	"redis": { "url": "${REDIS_URL}" }
 }
 ```
 
@@ -78,4 +78,4 @@ express-app/
 ✅ Database connection settings  
 ✅ Redis URL configuration  
 ✅ Feature flags (metrics, debug)  
-✅ Graceful shutdown  
+✅ Graceful shutdown

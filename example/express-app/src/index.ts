@@ -1,7 +1,7 @@
-import express from "express";
-import cors from "cors";
 import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
+import cors from "cors";
+import express from "express";
 
 // Load configuration with type-safe schema
 const config = createConfigSync({
@@ -77,14 +77,12 @@ app.get("/api/config", (req, res) => {
 const server = app.listen(config.server_port, config.server_host, () => {
 	console.log(`🚀 Server running on http://${config.server_host}:${config.server_port}`);
 	console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-	console.log(`🗄️  Database: ${config.database_host}:${config.database_port}/${config.database_name}`);
+	console.log(
+		`🗄️  Database: ${config.database_host}:${config.database_port}/${config.database_name}`,
+	);
 	console.log(`📦 Redis: ${config.redis_url}`);
-	console.log(
-		`📊 Metrics: ${config.features_enableMetrics ? "enabled" : "disabled"}`,
-	);
-	console.log(
-		`🐛 Debug: ${config.features_enableDebugMode ? "enabled" : "disabled"}`,
-	);
+	console.log(`📊 Metrics: ${config.features_enableMetrics ? "enabled" : "disabled"}`);
+	console.log(`🐛 Debug: ${config.features_enableDebugMode ? "enabled" : "disabled"}`);
 });
 
 // Graceful shutdown

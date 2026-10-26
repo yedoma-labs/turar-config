@@ -11,20 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      
+
       - uses: pnpm/action-setup@v6
-      
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Lint
         run: pnpm lint
-      
+
       - name: Type check
         run: pnpm typecheck
 
@@ -35,20 +35,20 @@ jobs:
         node-version: [24]
     steps:
       - uses: actions/checkout@v7
-      
+
       - uses: pnpm/action-setup@v6
-      
+
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Run tests
         run: pnpm test
-      
+
       - name: Coverage
         if: matrix.node-version == 24
         run: pnpm test:coverage
@@ -58,20 +58,20 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v7
-      
+
       - uses: pnpm/action-setup@v6
-      
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build
         run: pnpm build
-      
+
       - uses: actions/upload-artifact@v7
         with:
           name: dist

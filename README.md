@@ -77,20 +77,20 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
-  schema: {
-    database_host: eg.string().required(),
-    database_port: eg.integer().default(5432),
-    database_pool_min: eg.integer().default(2),
-    database_pool_max: eg.integer().default(10),
-    server_port: eg.port().default(3000),
-  },
-  configDir: "./config",
-  envFile: true, // Load .env file
-  prefix: "APP_", // Use APP_ prefix for env vars
+	schema: {
+		database_host: eg.string().required(),
+		database_port: eg.integer().default(5432),
+		database_pool_min: eg.integer().default(2),
+		database_pool_max: eg.integer().default(10),
+		server_port: eg.port().default(3000),
+	},
+	configDir: "./config",
+	envFile: true, // Load .env file
+	prefix: "APP_", // Use APP_ prefix for env vars
 });
 
 console.log(config.database_host); // Type-safe access
-console.log(config.server_port);   // Type: number
+console.log(config.server_port); // Type: number
 ```
 
 ## Configuration Cascading
@@ -129,12 +129,12 @@ Reference environment variables in config files using `${VAR}` syntax:
 
 ```json
 {
-  "database": {
-    "url": "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/myapp"
-  },
-  "api": {
-    "key": "${API_KEY}"
-  }
+	"database": {
+		"url": "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/myapp"
+	},
+	"api": {
+		"key": "${API_KEY}"
+	}
 }
 ```
 
@@ -142,7 +142,7 @@ To escape interpolation, use `\${VAR}`:
 
 ```json
 {
-  "example": "This is a literal \\${NOT_INTERPOLATED}"
+	"example": "This is a literal \\${NOT_INTERPOLATED}"
 }
 ```
 
@@ -154,12 +154,14 @@ Async version supporting HashiCorp Vault secrets provider.
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  configDir: "./config",
-  envFile: true,
-  secrets: { provider: "env" },
-  prefix: "APP_",
-  strict: false,
+	schema: {
+		/* ... */
+	},
+	configDir: "./config",
+	envFile: true,
+	secrets: { provider: "env" },
+	prefix: "APP_",
+	strict: false,
 });
 ```
 
@@ -169,24 +171,26 @@ Synchronous version for simple use cases.
 
 ```typescript
 const config = createConfigSync({
-  schema: { /* ... */ },
-  configDir: "./config",
-  envFile: true,
-  prefix: "APP_",
-  strict: false,
+	schema: {
+		/* ... */
+	},
+	configDir: "./config",
+	envFile: true,
+	prefix: "APP_",
+	strict: false,
 });
 ```
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `schema` | `SchemaDefinition` | **required** | Bylyt schema defining config structure |
-| `configDir` | `string` | `"./config"` | Directory containing config files |
-| `envFile` | `boolean \| string` | `false` | Load `.env` file (or custom path) |
-| `secrets` | `SecretsProviderConfig` | `undefined` | Secrets provider config |
-| `prefix` | `string` | `undefined` | Prefix for environment variables (e.g., `"APP_"`) |
-| `strict` | `boolean` | `false` | Throw on unknown prefixed env vars |
+| Option      | Type                    | Default      | Description                                       |
+| ----------- | ----------------------- | ------------ | ------------------------------------------------- |
+| `schema`    | `SchemaDefinition`      | **required** | Bylyt schema defining config structure            |
+| `configDir` | `string`                | `"./config"` | Directory containing config files                 |
+| `envFile`   | `boolean \| string`     | `false`      | Load `.env` file (or custom path)                 |
+| `secrets`   | `SecretsProviderConfig` | `undefined`  | Secrets provider config                           |
+| `prefix`    | `string`                | `undefined`  | Prefix for environment variables (e.g., `"APP_"`) |
+| `strict`    | `boolean`               | `false`      | Throw on unknown prefixed env vars                |
 
 ## File Structure
 
@@ -224,14 +228,14 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
-  schema: {
-    port: eg.port().default(3000),
-    host: eg.string().default("0.0.0.0"),
-    database_url: eg.url().required(),
-    log_level: eg.enum(["debug", "info", "warn", "error"] as const).default("info"),
-  },
-  configDir: "./config",
-  envFile: true,
+	schema: {
+		port: eg.port().default(3000),
+		host: eg.string().default("0.0.0.0"),
+		database_url: eg.url().required(),
+		log_level: eg.enum(["debug", "info", "warn", "error"] as const).default("info"),
+	},
+	configDir: "./config",
+	envFile: true,
 });
 
 // Start server with type-safe config
@@ -242,12 +246,12 @@ startServer(config.host, config.port);
 
 ```typescript
 const config = createConfigSync({
-  schema: {
-    database_host: eg.string(),
-    database_port: eg.port(),
-  },
-  prefix: "MYAPP_",
-  envFile: true,
+	schema: {
+		database_host: eg.string(),
+		database_port: eg.port(),
+	},
+	prefix: "MYAPP_",
+	envFile: true,
 });
 
 // Reads MYAPP_database_host and MYAPP_database_port from env
@@ -280,28 +284,28 @@ const config = createConfigSync({
 ```typescript
 import { eg, EnvValidationError } from "@yedoma-labs/bylyt-env-guard";
 import {
-  createConfigSync,
-  ConfigFileError,
-  ConfigInterpolationError,
+	createConfigSync,
+	ConfigFileError,
+	ConfigInterpolationError,
 } from "@yedoma-labs/turar-config";
 
 try {
-  const config = createConfigSync({
-    schema: {
-      required_field: eg.string().required(),
-    },
-    configDir: "./config",
-  });
+	const config = createConfigSync({
+		schema: {
+			required_field: eg.string().required(),
+		},
+		configDir: "./config",
+	});
 } catch (error) {
-  if (error instanceof ConfigFileError) {
-    console.error("Failed to load config file:", error.path);
-  }
-  if (error instanceof ConfigInterpolationError) {
-    console.error("Undefined variable:", error.variable);
-  }
-  if (error instanceof EnvValidationError) {
-    console.error("Validation failed:", error.failures);
-  }
+	if (error instanceof ConfigFileError) {
+		console.error("Failed to load config file:", error.path);
+	}
+	if (error instanceof ConfigInterpolationError) {
+		console.error("Undefined variable:", error.variable);
+	}
+	if (error instanceof EnvValidationError) {
+		console.error("Validation failed:", error.failures);
+	}
 }
 ```
 
@@ -337,15 +341,15 @@ turar-config is an **orchestration layer** built on top of bylyt-env-guard. Here
 
 ### Responsibilities
 
-| Feature | Handled By | Description |
-|---------|-----------|-------------|
-| File Loading | turar-config | Load `config/*.json` files |
-| Cascading | turar-config | Merge configs by environment |
-| Interpolation | turar-config | Resolve `${VAR}` in JSON |
-| Flattening | turar-config | `{db: {host}}` → `{db_host}` |
-| **Validation** | bylyt-env-guard | Type checking, constraints |
-| **Type Safety** | bylyt-env-guard | TypeScript inference |
-| **Freezing** | bylyt-env-guard | Immutable config object |
+| Feature         | Handled By      | Description                  |
+| --------------- | --------------- | ---------------------------- |
+| File Loading    | turar-config    | Load `config/*.json` files   |
+| Cascading       | turar-config    | Merge configs by environment |
+| Interpolation   | turar-config    | Resolve `${VAR}` in JSON     |
+| Flattening      | turar-config    | `{db: {host}}` → `{db_host}` |
+| **Validation**  | bylyt-env-guard | Type checking, constraints   |
+| **Type Safety** | bylyt-env-guard | TypeScript inference         |
+| **Freezing**    | bylyt-env-guard | Immutable config object      |
 
 ### When to Use What?
 
@@ -378,11 +382,11 @@ config/
 process.env.NODE_ENV = "production";
 
 const config = createConfigSync({
-  schema: {
-    api_url: eg.url().required(),
-    database_pool_max: eg.integer().default(10),
-  },
-  configDir: "./config",
+	schema: {
+		api_url: eg.url().required(),
+		database_pool_max: eg.integer().default(10),
+	},
+	configDir: "./config",
 });
 
 // In production: loads default.json + production.json
@@ -399,14 +403,14 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 const config = createConfigSync({
-  schema: {
-    port: eg.port().default(3000),
-    cors_origins: eg.array().of("string"),
-    session_secret: eg.string().sensitive().required(),
-    database_url: eg.url().required(),
-  },
-  configDir: "./config",
-  envFile: true,
+	schema: {
+		port: eg.port().default(3000),
+		cors_origins: eg.array().of("string"),
+		session_secret: eg.string().sensitive().required(),
+		database_url: eg.url().required(),
+	},
+	configDir: "./config",
+	envFile: true,
 });
 
 const app = express();
@@ -415,7 +419,7 @@ app.use(cors({ origin: config.cors_origins }));
 app.use(session({ secret: config.session_secret }));
 
 app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
+	console.log(`Server running on port ${config.port}`);
 });
 ```
 
@@ -429,27 +433,27 @@ import { createConfigSync } from "@yedoma-labs/turar-config";
 
 @Injectable()
 export class ConfigService {
-  private readonly config = createConfigSync({
-    schema: {
-      database_host: eg.string().required(),
-      database_port: eg.port().default(5432),
-      redis_url: eg.url().required(),
-      jwt_secret: eg.string().sensitive().required(),
-    },
-    configDir: "./config",
-    prefix: "APP_",
-  });
+	private readonly config = createConfigSync({
+		schema: {
+			database_host: eg.string().required(),
+			database_port: eg.port().default(5432),
+			redis_url: eg.url().required(),
+			jwt_secret: eg.string().sensitive().required(),
+		},
+		configDir: "./config",
+		prefix: "APP_",
+	});
 
-  get database() {
-    return {
-      host: this.config.database_host,
-      port: this.config.database_port,
-    };
-  }
+	get database() {
+		return {
+			host: this.config.database_host,
+			port: this.config.database_port,
+		};
+	}
 
-  get redis() {
-    return this.config.redis_url;
-  }
+	get redis() {
+		return this.config.redis_url;
+	}
 }
 ```
 
@@ -477,16 +481,16 @@ export class ConfigService {
 
 ```typescript
 const config = createConfigSync({
-  schema: {
-    services_redis_host: eg.string(),
-    services_redis_port: eg.port(),
-    services_redis_options_maxRetriesPerRequest: eg.integer(),
-    services_database_primary_host: eg.string(),
-    services_database_primary_port: eg.port(),
-    services_database_replica_host: eg.string(),
-    services_database_replica_port: eg.port(),
-  },
-  configDir: "./config",
+	schema: {
+		services_redis_host: eg.string(),
+		services_redis_port: eg.port(),
+		services_redis_options_maxRetriesPerRequest: eg.integer(),
+		services_database_primary_host: eg.string(),
+		services_database_primary_port: eg.port(),
+		services_database_replica_host: eg.string(),
+		services_database_replica_port: eg.port(),
+	},
+	configDir: "./config",
 });
 
 // Access flattened keys
@@ -539,11 +543,11 @@ project/
 ```typescript
 // Consistent naming: lowercase with underscores
 const schema = {
-  database_url: eg.url(),           // ✅ Good
-  database_connection_timeout: eg.integer(),  // ✅ Good
-  
-  DatabaseURL: eg.url(),            // ❌ Avoid
-  "database-url": eg.url(),         // ❌ Avoid (kebab-case)
+	database_url: eg.url(), // ✅ Good
+	database_connection_timeout: eg.integer(), // ✅ Good
+
+	DatabaseURL: eg.url(), // ❌ Avoid
+	"database-url": eg.url(), // ❌ Avoid (kebab-case)
 };
 
 // Environment variable mapping
@@ -597,26 +601,27 @@ API_KEY=secret123 NODE_ENV=production node app.js
 import { createConfigSync } from "@yedoma-labs/turar-config";
 
 try {
-  const config = createConfigSync({
-    schema: { /* ... */ },
-    configDir: "./config",
-  });
-  
-  // Log loaded config (excluding sensitive values)
-  console.log("Config loaded:", JSON.stringify(config, null, 2));
-  
+	const config = createConfigSync({
+		schema: {
+			/* ... */
+		},
+		configDir: "./config",
+	});
+
+	// Log loaded config (excluding sensitive values)
+	console.log("Config loaded:", JSON.stringify(config, null, 2));
 } catch (error) {
-  if (error instanceof ConfigFileError) {
-    console.error("Failed to load:", error.path);
-    console.error("Reason:", error.message);
-  } else if (error instanceof ConfigInterpolationError) {
-    console.error("Undefined variable:", error.variable);
-  } else if (error instanceof EnvValidationError) {
-    console.error("Validation failures:");
-    for (const failure of error.failures) {
-      console.error(`  ${failure.field}: ${failure.message}`);
-    }
-  }
+	if (error instanceof ConfigFileError) {
+		console.error("Failed to load:", error.path);
+		console.error("Reason:", error.message);
+	} else if (error instanceof ConfigInterpolationError) {
+		console.error("Undefined variable:", error.variable);
+	} else if (error instanceof EnvValidationError) {
+		console.error("Validation failures:");
+		for (const failure of error.failures) {
+			console.error(`  ${failure.field}: ${failure.message}`);
+		}
+	}
 }
 ```
 
@@ -753,13 +758,13 @@ import { createConfigSync } from "@yedoma-labs/turar-config";
 
 // Automatically detects YAML/TOML/JSON
 const config = createConfigSync({
-  schema: {
-    server_host: eg.string(),
-    server_port: eg.port(),
-    database_host: eg.string(),
-    features_enableMetrics: eg.boolean(),
-  },
-  configDir: "./config", // Looks for .yaml, .yml, .toml, .json
+	schema: {
+		server_host: eg.string(),
+		server_port: eg.port(),
+		database_host: eg.string(),
+		features_enableMetrics: eg.boolean(),
+	},
+	configDir: "./config", // Looks for .yaml, .yml, .toml, .json
 });
 ```
 
@@ -796,20 +801,22 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { watchConfig } from "@yedoma-labs/turar-config";
 
 const handle = await watchConfig({
-  schema: {
-    server_port: eg.port().default(3000),
-    database_host: eg.string().required(),
-    features_enableDebug: eg.boolean().default(false),
-  },
-  configDir: "./config",
-  onChange: (newConfig, change, oldConfig) => {
-    console.log(`Config changed: ${change.type} ${change.path}`);
-    console.log(`Debug mode: ${oldConfig.features_enableDebug} → ${newConfig.features_enableDebug}`);
-    
-    // Update your app with new config
-    updateFeatureFlags(newConfig);
-  },
-  debounce: 500, // Wait 500ms after last change before reloading
+	schema: {
+		server_port: eg.port().default(3000),
+		database_host: eg.string().required(),
+		features_enableDebug: eg.boolean().default(false),
+	},
+	configDir: "./config",
+	onChange: (newConfig, change, oldConfig) => {
+		console.log(`Config changed: ${change.type} ${change.path}`);
+		console.log(
+			`Debug mode: ${oldConfig.features_enableDebug} → ${newConfig.features_enableDebug}`,
+		);
+
+		// Update your app with new config
+		updateFeatureFlags(newConfig);
+	},
+	debounce: 500, // Wait 500ms after last change before reloading
 });
 
 // Get current config at any time
@@ -821,26 +828,22 @@ await handle.stop();
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `onChange` | `function` | `undefined` | Callback when config changes |
-| `debounce` | `number` | `500` | Milliseconds to wait after last change |
-| `ignoreInitial` | `boolean` | `true` | Don't trigger onChange on startup |
-| All config options | | | Same as `createConfig()` |
+| Option             | Type       | Default     | Description                            |
+| ------------------ | ---------- | ----------- | -------------------------------------- |
+| `onChange`         | `function` | `undefined` | Callback when config changes           |
+| `debounce`         | `number`   | `500`       | Milliseconds to wait after last change |
+| `ignoreInitial`    | `boolean`  | `true`      | Don't trigger onChange on startup      |
+| All config options |            |             | Same as `createConfig()`               |
 
 ### onChange Callback
 
 ```typescript
-type OnChange = (
-  newConfig: ConfigResult,
-  change: ConfigChange,
-  oldConfig: ConfigResult
-) => void;
+type OnChange = (newConfig: ConfigResult, change: ConfigChange, oldConfig: ConfigResult) => void;
 
 interface ConfigChange {
-  type: "added" | "changed" | "removed";
-  path: string;       // Full path to changed file
-  timestamp: Date;    // When change was detected
+	type: "added" | "changed" | "removed";
+	path: string; // Full path to changed file
+	timestamp: Date; // When change was detected
 }
 ```
 
@@ -848,8 +851,8 @@ interface ConfigChange {
 
 ```typescript
 interface WatchHandle {
-  stop(): Promise<void>;          // Stop watching
-  getConfig(): ConfigResult;      // Get current config
+	stop(): Promise<void>; // Stop watching
+	getConfig(): ConfigResult; // Get current config
 }
 ```
 
@@ -858,38 +861,38 @@ interface WatchHandle {
 **Feature Flags**
 ```typescript
 const handle = await watchConfig({
-  schema: {
-    features_newUI: eg.boolean().default(false),
-    features_betaFeatures: eg.boolean().default(false),
-  },
-  configDir: "./config",
-  onChange: (newConfig) => {
-    // Update feature flags without restart
-    featureFlags.update(newConfig);
-  },
+	schema: {
+		features_newUI: eg.boolean().default(false),
+		features_betaFeatures: eg.boolean().default(false),
+	},
+	configDir: "./config",
+	onChange: (newConfig) => {
+		// Update feature flags without restart
+		featureFlags.update(newConfig);
+	},
 });
 ```
 
 **Database Connection Pool**
 ```typescript
 const handle = await watchConfig({
-  schema: {
-    database_pool_min: eg.integer().default(2),
-    database_pool_max: eg.integer().default(10),
-  },
-  configDir: "./config",
-  onChange: (newConfig, change, oldConfig) => {
-    if (
-      newConfig.database_pool_max !== oldConfig.database_pool_max ||
-      newConfig.database_pool_min !== oldConfig.database_pool_min
-    ) {
-      // Reconfigure pool without restart
-      databasePool.reconfigure({
-        min: newConfig.database_pool_min,
-        max: newConfig.database_pool_max,
-      });
-    }
-  },
+	schema: {
+		database_pool_min: eg.integer().default(2),
+		database_pool_max: eg.integer().default(10),
+	},
+	configDir: "./config",
+	onChange: (newConfig, change, oldConfig) => {
+		if (
+			newConfig.database_pool_max !== oldConfig.database_pool_max ||
+			newConfig.database_pool_min !== oldConfig.database_pool_min
+		) {
+			// Reconfigure pool without restart
+			databasePool.reconfigure({
+				min: newConfig.database_pool_min,
+				max: newConfig.database_pool_max,
+			});
+		}
+	},
 });
 ```
 
@@ -898,18 +901,18 @@ const handle = await watchConfig({
 let handle: WatchHandle | null = null;
 
 if (process.env.NODE_ENV === "development") {
-  handle = await watchConfig({
-    schema: mySchema,
-    configDir: "./config",
-    onChange: (newConfig) => {
-      console.log("🔄 Config reloaded:", newConfig);
-    },
-  });
+	handle = await watchConfig({
+		schema: mySchema,
+		configDir: "./config",
+		onChange: (newConfig) => {
+			console.log("🔄 Config reloaded:", newConfig);
+		},
+	});
 }
 
 // Cleanup on shutdown
 process.on("SIGTERM", async () => {
-  if (handle) await handle.stop();
+	if (handle) await handle.stop();
 });
 ```
 
@@ -933,7 +936,7 @@ process.on("SIGTERM", async () => {
 ✅ **Set appropriate debounce** - 500ms works well for most cases  
 ✅ **Handle partial updates** - Check what changed before applying  
 ✅ **Test error scenarios** - Ensure app handles invalid config gracefully  
-✅ **Stop watching on shutdown** - Call `handle.stop()` in cleanup hooks  
+✅ **Stop watching on shutdown** - Call `handle.stop()` in cleanup hooks
 
 ## HashiCorp Vault Integration
 
@@ -946,23 +949,23 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfig } from "@yedoma-labs/turar-config";
 
 const config = await createConfig({
-  schema: {
-    database_host: eg.string().required(),
-    database_password: eg.string().required(),
-    api_key: eg.string().required(),
-  },
-  configDir: "./config",
-  secrets: {
-    provider: "vault",
-    vault: {
-      url: "https://vault.example.com",
-      auth: {
-        type: "token",
-        token: process.env.VAULT_TOKEN!,
-      },
-      path: "myapp/config",
-    },
-  },
+	schema: {
+		database_host: eg.string().required(),
+		database_password: eg.string().required(),
+		api_key: eg.string().required(),
+	},
+	configDir: "./config",
+	secrets: {
+		provider: "vault",
+		vault: {
+			url: "https://vault.example.com",
+			auth: {
+				type: "token",
+				token: process.env.VAULT_TOKEN!,
+			},
+			path: "myapp/config",
+		},
+	},
 });
 
 console.log(config.database_password); // Secret from Vault
@@ -974,20 +977,22 @@ Simplest method - use a Vault token directly:
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  secrets: {
-    provider: "vault",
-    vault: {
-      url: "https://vault.example.com",
-      auth: {
-        type: "token",
-        token: process.env.VAULT_TOKEN!, // Read from environment
-      },
-      path: "myapp/production/config",
-      mountPath: "secret", // Optional, defaults to "secret"
-      namespace: "my-namespace", // Optional, for Vault Enterprise
-    },
-  },
+	schema: {
+		/* ... */
+	},
+	secrets: {
+		provider: "vault",
+		vault: {
+			url: "https://vault.example.com",
+			auth: {
+				type: "token",
+				token: process.env.VAULT_TOKEN!, // Read from environment
+			},
+			path: "myapp/production/config",
+			mountPath: "secret", // Optional, defaults to "secret"
+			namespace: "my-namespace", // Optional, for Vault Enterprise
+		},
+	},
 });
 ```
 
@@ -997,31 +1002,33 @@ Recommended for production - use AppRole for better security:
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  secrets: {
-    provider: "vault",
-    vault: {
-      url: "https://vault.example.com",
-      auth: {
-        type: "appRole",
-        roleId: process.env.VAULT_ROLE_ID!,
-        secretId: process.env.VAULT_SECRET_ID!,
-      },
-      path: "myapp/production/config",
-    },
-  },
+	schema: {
+		/* ... */
+	},
+	secrets: {
+		provider: "vault",
+		vault: {
+			url: "https://vault.example.com",
+			auth: {
+				type: "appRole",
+				roleId: process.env.VAULT_ROLE_ID!,
+				secretId: process.env.VAULT_SECRET_ID!,
+			},
+			path: "myapp/production/config",
+		},
+	},
 });
 ```
 
 ### Vault Configuration Options
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `url` | `string` | Yes | Vault server URL |
-| `auth` | `VaultAuth` | Yes | Authentication config |
-| `path` | `string` | Yes | Path to secrets in KV store |
-| `mountPath` | `string` | No | KV mount path (default: `"secret"`) |
-| `namespace` | `string` | No | Vault namespace (Enterprise only) |
+| Option      | Type        | Required | Description                         |
+| ----------- | ----------- | -------- | ----------------------------------- |
+| `url`       | `string`    | Yes      | Vault server URL                    |
+| `auth`      | `VaultAuth` | Yes      | Authentication config               |
+| `path`      | `string`    | Yes      | Path to secrets in KV store         |
+| `mountPath` | `string`    | No       | KV mount path (default: `"secret"`) |
+| `namespace` | `string`    | No       | Vault namespace (Enterprise only)   |
 
 ### Authentication Types
 
@@ -1064,13 +1071,15 @@ Vault secrets are automatically flattened using underscore separators:
 **Flattened Config:**
 ```typescript
 const config = await createConfig({
-  schema: {
-    database_host: eg.string().required(),
-    database_credentials_username: eg.string().required(),
-    database_credentials_password: eg.string().required(),
-    api_key: eg.string().required(),
-  },
-  secrets: { /* vault config */ },
+	schema: {
+		database_host: eg.string().required(),
+		database_credentials_username: eg.string().required(),
+		database_credentials_password: eg.string().required(),
+		api_key: eg.string().required(),
+	},
+	secrets: {
+		/* vault config */
+	},
 });
 
 console.log(config.database_host); // "db.example.com"
@@ -1167,15 +1176,15 @@ Vault errors are wrapped in `ConfigSecretError`:
 import { ConfigSecretError } from "@yedoma-labs/turar-config";
 
 try {
-  const config = await createConfig({
-    schema: { api_key: eg.string().required() },
-    secrets: { provider: "vault", /* ... */ },
-  });
+	const config = await createConfig({
+		schema: { api_key: eg.string().required() },
+		secrets: { provider: "vault" /* ... */ },
+	});
 } catch (error) {
-  if (error instanceof ConfigSecretError) {
-    console.error("Vault error:", error.message);
-    // Handle: connection failure, auth error, missing secrets, etc.
-  }
+	if (error instanceof ConfigSecretError) {
+		console.error("Vault error:", error.message);
+		// Handle: connection failure, auth error, missing secrets, etc.
+	}
 }
 ```
 
@@ -1186,7 +1195,7 @@ try {
 ✅ **Rotate secrets regularly** - Vault supports automatic rotation  
 ✅ **Use short TTLs** - Limit token lifetime  
 ✅ **Enable audit logging** - Track all secret access  
-✅ **Use namespaces** - Isolate environments (Vault Enterprise)  
+✅ **Use namespaces** - Isolate environments (Vault Enterprise)
 
 ### Troubleshooting
 
@@ -1224,45 +1233,45 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfig, ConfigSecretError } from "@yedoma-labs/turar-config";
 
 async function loadConfig() {
-  try {
-    const config = await createConfig({
-      schema: {
-        // From config files
-        server_port: eg.port().default(3000),
-        server_host: eg.string().default("0.0.0.0"),
-        
-        // From Vault
-        database_host: eg.string().required(),
-        database_port: eg.port().required(),
-        database_username: eg.string().required(),
-        database_password: eg.string().required(),
-        api_key: eg.string().required(),
-      },
-      configDir: "./config",
-      secrets: {
-        provider: "vault",
-        vault: {
-          url: process.env.VAULT_ADDR || "http://localhost:8200",
-          auth: {
-            type: "appRole",
-            roleId: process.env.VAULT_ROLE_ID!,
-            secretId: process.env.VAULT_SECRET_ID!,
-          },
-          path: `myapp/${process.env.NODE_ENV}/config`,
-          namespace: process.env.VAULT_NAMESPACE,
-        },
-      },
-    });
+	try {
+		const config = await createConfig({
+			schema: {
+				// From config files
+				server_port: eg.port().default(3000),
+				server_host: eg.string().default("0.0.0.0"),
 
-    console.log("✅ Configuration loaded successfully");
-    return config;
-  } catch (error) {
-    if (error instanceof ConfigSecretError) {
-      console.error("❌ Vault error:", error.message);
-      process.exit(1);
-    }
-    throw error;
-  }
+				// From Vault
+				database_host: eg.string().required(),
+				database_port: eg.port().required(),
+				database_username: eg.string().required(),
+				database_password: eg.string().required(),
+				api_key: eg.string().required(),
+			},
+			configDir: "./config",
+			secrets: {
+				provider: "vault",
+				vault: {
+					url: process.env.VAULT_ADDR || "http://localhost:8200",
+					auth: {
+						type: "appRole",
+						roleId: process.env.VAULT_ROLE_ID!,
+						secretId: process.env.VAULT_SECRET_ID!,
+					},
+					path: `myapp/${process.env.NODE_ENV}/config`,
+					namespace: process.env.VAULT_NAMESPACE,
+				},
+			},
+		});
+
+		console.log("✅ Configuration loaded successfully");
+		return config;
+	} catch (error) {
+		if (error instanceof ConfigSecretError) {
+			console.error("❌ Vault error:", error.message);
+			process.exit(1);
+		}
+		throw error;
+	}
 }
 
 const config = await loadConfig();
@@ -1295,19 +1304,19 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfig } from "@yedoma-labs/turar-config";
 
 const config = await createConfig({
-  schema: {
-    database_host: eg.string().required(),
-    database_password: eg.string().required(),
-    api_key: eg.string().required(),
-  },
-  configDir: "./config",
-  secrets: {
-    provider: "aws-secrets-manager",
-    aws: {
-      region: "us-east-1",
-      secretName: "myapp/production/config",
-    },
-  },
+	schema: {
+		database_host: eg.string().required(),
+		database_password: eg.string().required(),
+		api_key: eg.string().required(),
+	},
+	configDir: "./config",
+	secrets: {
+		provider: "aws-secrets-manager",
+		aws: {
+			region: "us-east-1",
+			secretName: "myapp/production/config",
+		},
+	},
 });
 
 console.log(config.database_password); // Secret from AWS
@@ -1319,29 +1328,31 @@ In production, use IAM roles instead of explicit credentials:
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  secrets: {
-    provider: "aws-secrets-manager",
-    aws: {
-      region: "us-east-1",
-      secretName: "myapp/production/config",
-      // No credentials needed - uses IAM role
-    },
-  },
+	schema: {
+		/* ... */
+	},
+	secrets: {
+		provider: "aws-secrets-manager",
+		aws: {
+			region: "us-east-1",
+			secretName: "myapp/production/config",
+			// No credentials needed - uses IAM role
+		},
+	},
 });
 ```
 
 **IAM Policy Example:**
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": [
-      "secretsmanager:GetSecretValue"
-    ],
-    "Resource": "arn:aws:secretsmanager:us-east-1:123456789012:secret:myapp/*"
-  }]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": ["secretsmanager:GetSecretValue"],
+			"Resource": "arn:aws:secretsmanager:us-east-1:123456789012:secret:myapp/*"
+		}
+	]
 }
 ```
 
@@ -1351,16 +1362,18 @@ For development or CI/CD:
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  secrets: {
-    provider: "aws-secrets-manager",
-    aws: {
-      region: "us-east-1",
-      secretName: "myapp/dev/config",
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-  },
+	schema: {
+		/* ... */
+	},
+	secrets: {
+		provider: "aws-secrets-manager",
+		aws: {
+			region: "us-east-1",
+			secretName: "myapp/dev/config",
+			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+		},
+	},
 });
 ```
 
@@ -1384,17 +1397,19 @@ Test with LocalStack locally:
 
 ```typescript
 const config = await createConfig({
-  schema: { /* ... */ },
-  secrets: {
-    provider: "aws-secrets-manager",
-    aws: {
-      region: "us-east-1",
-      secretName: "test/config",
-      endpoint: "http://localhost:4566", // LocalStack endpoint
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  },
+	schema: {
+		/* ... */
+	},
+	secrets: {
+		provider: "aws-secrets-manager",
+		aws: {
+			region: "us-east-1",
+			secretName: "test/config",
+			endpoint: "http://localhost:4566", // LocalStack endpoint
+			accessKeyId: "test",
+			secretAccessKey: "test",
+		},
+	},
 });
 ```
 
@@ -1411,14 +1426,14 @@ services:
 
 ### Configuration Options
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `region` | `string` | Yes | AWS region (e.g., `us-east-1`, `eu-west-2`) |
-| `secretName` | `string` | Yes | Secret name or ARN |
-| `endpoint` | `string` | No | Custom endpoint (for LocalStack/testing) |
-| `accessKeyId` | `string` | No | AWS access key (use IAM roles instead) |
-| `secretAccessKey` | `string` | No | AWS secret key (use IAM roles instead) |
-| `sessionToken` | `string` | No | Session token for temporary credentials |
+| Option            | Type     | Required | Description                                 |
+| ----------------- | -------- | -------- | ------------------------------------------- |
+| `region`          | `string` | Yes      | AWS region (e.g., `us-east-1`, `eu-west-2`) |
+| `secretName`      | `string` | Yes      | Secret name or ARN                          |
+| `endpoint`        | `string` | No       | Custom endpoint (for LocalStack/testing)    |
+| `accessKeyId`     | `string` | No       | AWS access key (use IAM roles instead)      |
+| `secretAccessKey` | `string` | No       | AWS secret key (use IAM roles instead)      |
+| `sessionToken`    | `string` | No       | Session token for temporary credentials     |
 
 ### Secret Format
 
@@ -1426,30 +1441,30 @@ AWS secrets must be **JSON objects**:
 
 ```json
 {
-  "database_host": "prod-db.example.com",
-  "database_password": "secret123",
-  "api_key": "key-xyz"
+	"database_host": "prod-db.example.com",
+	"database_password": "secret123",
+	"api_key": "key-xyz"
 }
 ```
 
 **Nested secrets are automatically flattened:**
 ```json
 {
-  "database": {
-    "host": "prod-db.example.com",
-    "credentials": {
-      "username": "admin",
-      "password": "secret123"
-    }
-  }
+	"database": {
+		"host": "prod-db.example.com",
+		"credentials": {
+			"username": "admin",
+			"password": "secret123"
+		}
+	}
 }
 ```
 
 **Becomes:**
 ```typescript
-config.database_host              // "prod-db.example.com"
-config.database_credentials_username  // "admin"
-config.database_credentials_password  // "secret123"
+config.database_host; // "prod-db.example.com"
+config.database_credentials_username; // "admin"
+config.database_credentials_password; // "secret123"
 ```
 
 ### Priority Order
@@ -1474,7 +1489,7 @@ Config Files (lowest priority)
 ✅ **Least privilege** - Only grant `GetSecretValue` permission  
 ✅ **Use resource tags** - Organize and control access  
 ✅ **Enable CloudTrail** - Audit all secret access  
-✅ **Short-lived credentials** - Use temporary session tokens  
+✅ **Short-lived credentials** - Use temporary session tokens
 
 ### Error Handling
 
@@ -1482,18 +1497,18 @@ Config Files (lowest priority)
 import { ConfigSecretError } from "@yedoma-labs/turar-config";
 
 try {
-  const config = await createConfig({
-    schema: { api_key: eg.string().required() },
-    secrets: {
-      provider: "aws-secrets-manager",
-      aws: { region: "us-east-1", secretName: "app/config" },
-    },
-  });
+	const config = await createConfig({
+		schema: { api_key: eg.string().required() },
+		secrets: {
+			provider: "aws-secrets-manager",
+			aws: { region: "us-east-1", secretName: "app/config" },
+		},
+	});
 } catch (error) {
-  if (error instanceof ConfigSecretError) {
-    console.error("AWS error:", error.message);
-    // Handle: permission denied, secret not found, etc.
-  }
+	if (error instanceof ConfigSecretError) {
+		console.error("AWS error:", error.message);
+		// Handle: permission denied, secret not found, etc.
+	}
 }
 ```
 
@@ -1538,15 +1553,15 @@ aws secretsmanager create-secret \
 
 ### Comparison: AWS vs Vault
 
-| Feature | AWS Secrets Manager | HashiCorp Vault |
-|---------|---------------------|------------------|
-| **Cloud native** | ✅ AWS only | ✅ Any cloud/on-prem |
-| **Managed service** | ✅ Fully managed | ❌ Self-hosted |
-| **Auto rotation** | ✅ Built-in | ✅ Supported |
-| **Cost** | $0.40/secret/month + API calls | Infrastructure + maintenance |
-| **Setup** | Easy (IAM) | Complex (install, configure) |
-| **Access control** | IAM policies | ACL policies |
-| **Best for** | AWS-native apps | Multi-cloud, on-prem |
+| Feature             | AWS Secrets Manager            | HashiCorp Vault              |
+| ------------------- | ------------------------------ | ---------------------------- |
+| **Cloud native**    | ✅ AWS only                    | ✅ Any cloud/on-prem         |
+| **Managed service** | ✅ Fully managed               | ❌ Self-hosted               |
+| **Auto rotation**   | ✅ Built-in                    | ✅ Supported                 |
+| **Cost**            | $0.40/secret/month + API calls | Infrastructure + maintenance |
+| **Setup**           | Easy (IAM)                     | Complex (install, configure) |
+| **Access control**  | IAM policies                   | ACL policies                 |
+| **Best for**        | AWS-native apps                | Multi-cloud, on-prem         |
 
 ### Complete Example
 
@@ -1555,39 +1570,39 @@ import { eg } from "@yedoma-labs/bylyt-env-guard";
 import { createConfig, ConfigSecretError } from "@yedoma-labs/turar-config";
 
 async function loadConfig() {
-  try {
-    const config = await createConfig({
-      schema: {
-        // From config files
-        server_port: eg.port().default(3000),
-        server_host: eg.string().default("0.0.0.0"),
-        
-        // From AWS Secrets Manager
-        database_host: eg.string().required(),
-        database_port: eg.port().required(),
-        database_username: eg.string().required(),
-        database_password: eg.string().required(),
-        api_key: eg.string().required(),
-      },
-      configDir: "./config",
-      secrets: {
-        provider: "aws-secrets-manager",
-        aws: {
-          region: process.env.AWS_REGION || "us-east-1",
-          secretName: `myapp/${process.env.NODE_ENV}/config`,
-        },
-      },
-    });
+	try {
+		const config = await createConfig({
+			schema: {
+				// From config files
+				server_port: eg.port().default(3000),
+				server_host: eg.string().default("0.0.0.0"),
 
-    console.log("✅ Configuration loaded successfully");
-    return config;
-  } catch (error) {
-    if (error instanceof ConfigSecretError) {
-      console.error("❌ AWS Secrets Manager error:", error.message);
-      process.exit(1);
-    }
-    throw error;
-  }
+				// From AWS Secrets Manager
+				database_host: eg.string().required(),
+				database_port: eg.port().required(),
+				database_username: eg.string().required(),
+				database_password: eg.string().required(),
+				api_key: eg.string().required(),
+			},
+			configDir: "./config",
+			secrets: {
+				provider: "aws-secrets-manager",
+				aws: {
+					region: process.env.AWS_REGION || "us-east-1",
+					secretName: `myapp/${process.env.NODE_ENV}/config`,
+				},
+			},
+		});
+
+		console.log("✅ Configuration loaded successfully");
+		return config;
+	} catch (error) {
+		if (error instanceof ConfigSecretError) {
+			console.error("❌ AWS Secrets Manager error:", error.message);
+			process.exit(1);
+		}
+		throw error;
+	}
 }
 
 const config = await loadConfig();

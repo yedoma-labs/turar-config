@@ -1,108 +1,108 @@
 {
-  "name": "@yedoma-labs/turar-config",
-  "version": "0.3.2",
-  "description": "Type-safe configuration management with file loading, environment cascading, and secrets integration - extends bylyt-env-guard",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
-  "packageManager": "pnpm@12.14.0",
-  "scripts": {
-    "build": "tsdown",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "biome check src tests",
-    "lint:fix": "biome check --write src tests",
-    "format": "biome format --write src tests",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm run build"
-  },
-  "keywords": [
-    "config",
-    "configuration",
-    "environment",
-    "env",
-    "validation",
-    "type-safe",
-    "typescript",
-    "cascade",
-    "cascading",
-    "secrets",
-    "json",
-    "dotenv",
-    "node-config",
-    "convict",
-    "12factor",
-    "settings",
-    "multi-environment",
-    "interpolation",
-    "vault",
-    "bylyt",
-    "schema",
-    "zero-dependency"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yedoma-labs/turar-config"
-  },
-  "homepage": "https://github.com/yedoma-labs/turar-config#readme",
-  "bugs": {
-    "url": "https://github.com/yedoma-labs/turar-config/issues"
-  },
-  "author": "",
-  "license": "MIT",
-  "peerDependencies": {
-    "@yedoma-labs/bylyt-env-guard": "^0.3.5"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.5.15",
-    "@commitlint/cli": "^21.2.3",
-    "@commitlint/config-conventional": "^21.2.3",
-    "@semantic-release/changelog": "^7.0.0",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^11.0.1",
-    "@semantic-release/github": "^12.0.10",
-    "@semantic-release/npm": "^13.2.0",
-    "@semantic-release/release-notes-generator": "^14.1.1",
-    "@types/node": "26.6.5",
-    "@typescript/typescript6": "^6.0.2",
-    "@vitest/coverage-v8": "^5.0.5",
-    "@yedoma-labs/bylyt-env-guard": "^0.3.7",
-    "semantic-release": "^25.0.9",
-    "tsdown": "^0.23.1",
-    "typescript": "7.0.2",
-    "vitest": "5.0.5"
-  },
-  "dependencies": {
-    "@iarna/toml": "^2.2.5",
-    "chokidar": "^5.0.0",
-    "yaml": "^2.9.1"
-  },
-  "optionalDependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.1152.0",
-    "node-vault": "^0.13.0"
-  },
-  "simple-git-hooks": {
-    "commit-msg": "pnpm exec commitlint --edit $1"
-  }
+	"name": "@yedoma-labs/turar-config",
+	"version": "0.3.2",
+	"description": "Type-safe configuration management with file loading, environment cascading, and secrets integration - extends bylyt-env-guard",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@12.15.0",
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"lint": "biome check src tests",
+		"lint:fix": "biome check --write src tests",
+		"format": "biome format --write src tests",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "pnpm run build"
+	},
+	"keywords": [
+		"config",
+		"configuration",
+		"environment",
+		"env",
+		"validation",
+		"type-safe",
+		"typescript",
+		"cascade",
+		"cascading",
+		"secrets",
+		"json",
+		"dotenv",
+		"node-config",
+		"convict",
+		"12factor",
+		"settings",
+		"multi-environment",
+		"interpolation",
+		"vault",
+		"bylyt",
+		"schema",
+		"zero-dependency"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/yedoma-labs/turar-config"
+	},
+	"homepage": "https://github.com/yedoma-labs/turar-config#readme",
+	"bugs": {
+		"url": "https://github.com/yedoma-labs/turar-config/issues"
+	},
+	"author": "",
+	"license": "MIT",
+	"peerDependencies": {
+		"@yedoma-labs/bylyt-env-guard": "^0.3.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.6.3",
+		"@commitlint/cli": "^21.2.4",
+		"@commitlint/config-conventional": "^21.2.4",
+		"@semantic-release/changelog": "^7.0.0",
+		"@semantic-release/commit-analyzer": "^13.0.1",
+		"@semantic-release/exec": "^7.1.0",
+		"@semantic-release/git": "^11.0.1",
+		"@semantic-release/github": "^12.0.10",
+		"@semantic-release/npm": "^13.2.0",
+		"@semantic-release/release-notes-generator": "^14.1.1",
+		"@types/node": "26.6.5",
+		"@typescript/typescript6": "^6.0.2",
+		"@vitest/coverage-v8": "^5.0.5",
+		"@yedoma-labs/bylyt-env-guard": "^0.3.7",
+		"semantic-release": "^25.0.9",
+		"tsdown": "^0.23.2",
+		"typescript": "^6.0.3",
+		"vitest": "5.0.5"
+	},
+	"dependencies": {
+		"@iarna/toml": "^2.2.5",
+		"chokidar": "^6.0.0",
+		"yaml": "^2.9.1"
+	},
+	"optionalDependencies": {
+		"@aws-sdk/client-secrets-manager": "^3.1156.0",
+		"node-vault": "^0.13.0"
+	},
+	"simple-git-hooks": {
+		"commit-msg": "pnpm exec commitlint --edit $1"
+	}
 }
