@@ -90,7 +90,7 @@
 		"@yedoma-labs/bylyt-env-guard": "^0.3.7",
 		"semantic-release": "^25.0.9",
 		"tsdown": "^0.23.2",
-		"typescript": "^6.0.3",
+		"typescript": "7.0.2",
 		"vitest": "5.0.5"
 	},
 	"dependencies": {
