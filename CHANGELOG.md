@@ -1,16 +1,14 @@
 ## [0.3.2](https://github.com/yedoma-labs/turar-config/compare/v0.3.1...v0.3.2) (2026-10-18)
 
-
 ### Bug Fixes
 
-* **watcher:** migrate to chokidar 5 directory watch ([#6](https://github.com/yedoma-labs/turar-config/issues/6)) ([6f6bc00](https://github.com/yedoma-labs/turar-config/commit/6f6bc0083dad51a3a5567224be28f7aec53a0207))
+- **watcher:** migrate to chokidar 5 directory watch ([#6](https://github.com/yedoma-labs/turar-config/issues/6)) ([6f6bc00](https://github.com/yedoma-labs/turar-config/commit/6f6bc0083dad51a3a5567224be28f7aec53a0207))
 
 ## [0.3.1](https://github.com/yedoma-labs/turar-config/compare/v0.3.0...v0.3.1) (2026-10-10)
 
-
 ### Bug Fixes
 
-* **deps:** override vulnerable transitive dependencies ([#3](https://github.com/yedoma-labs/turar-config/issues/3)) ([b3c5f0a](https://github.com/yedoma-labs/turar-config/commit/b3c5f0aed2dfe6a3784dca9b0334cd747be2b229))
+- **deps:** override vulnerable transitive dependencies ([#3](https://github.com/yedoma-labs/turar-config/issues/3)) ([b3c5f0a](https://github.com/yedoma-labs/turar-config/commit/b3c5f0aed2dfe6a3784dca9b0334cd747be2b229))
 
 # Changelog
 
@@ -77,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Error message security**: Sanitize to first line only, 200 char limit (prevents info disclosure)
   - **Watcher race conditions**: Proper error handler cleanup, stopped flag protection
   - **Separator validation**: Non-empty, non-alphanumeric enforcement in flattenObject
-  - **Prototype pollution hardening**: Block ___proto__, __proto, CONSTRUCTOR, PROTOTYPE variations
+  - **Prototype pollution hardening**: Block _**proto**, __proto, CONSTRUCTOR, PROTOTYPE variations
   - **Path sanitization**: Better ConfigFileError path display (basename + first 100 chars)
 - **Documentation fixes**
   - Fixed missing imports in code examples

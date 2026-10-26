@@ -16,21 +16,25 @@ example/
 ## Running the Example
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Run in development mode:
+
    ```bash
    NODE_ENV=development tsx example/index.ts
    ```
 
 3. Run in production mode:
+
    ```bash
    NODE_ENV=production DB_HOST=prod.example.com tsx example/index.ts
    ```
 
 4. Override specific values:
+
    ```bash
    NODE_ENV=development APP_server_port=8080 APP_logging_level=debug tsx example/index.ts
    ```
