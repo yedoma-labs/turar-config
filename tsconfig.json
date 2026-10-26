@@ -12,6 +12,7 @@
 		"outDir": "dist",
 		"rootDir": "src",
 		"isolatedModules": true,
+		"isolatedDeclarations": true,
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": false
 	},
