@@ -9,6 +9,7 @@ const MAX_DEPTH = 100;
  *
  * Syntax:
  * - ${VAR} - Replace with environment variable
+ * - ${VAR:-fallback} - Use fallback when VAR is unset or empty (fallback cannot contain "}")
  * - \${VAR} - Escape to literal ${VAR}
  *
  * @param value - Value to interpolate (if string)
@@ -55,17 +56,25 @@ export function interpolateValue(
 				continue;
 			}
 
-			// Extract variable name
-			const varName = value.substring(i + 2, closeIdx);
+			// Split "NAME:-fallback" into the variable name and an optional fallback
+			const expression = value.substring(i + 2, closeIdx);
+			const fallbackIdx = expression.indexOf(":-");
+			const varName = fallbackIdx === -1 ? expression : expression.substring(0, fallbackIdx);
 			if (varName.length === 0) {
 				// Empty variable name, treat as literal
 				result += value[i];
 				i++;
 				continue;
 			}
+			const fallback = fallbackIdx === -1 ? undefined : expression.substring(fallbackIdx + 2);
 
-			// Look up variable
+			// Look up variable; with a fallback, an unset or empty value uses the fallback
 			const envValue = envVars[varName];
+			if (fallback !== undefined && (envValue === undefined || envValue === "")) {
+				result += fallback;
+				i = closeIdx + 1;
+				continue;
+			}
 			if (envValue === undefined) {
 				throw new ConfigInterpolationError("Undefined environment variable", varName);
 			}

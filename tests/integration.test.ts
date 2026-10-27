@@ -91,6 +91,40 @@ describe("Integration Tests", () => {
 		}
 	});
 
+	it("uses ${VAR:-fallback} in config files when the variable is not set", () => {
+		delete process.env.OPTIONAL_DB_HOST;
+		process.env.OPTIONAL_DB_PORT = "6543";
+
+		const tmpDir = join(tmpdir(), `turar-fallback-${Date.now()}`);
+		mkdirSync(tmpDir, { recursive: true });
+
+		writeFileSync(
+			join(tmpDir, "default.json"),
+			JSON.stringify({
+				database: {
+					host: "${OPTIONAL_DB_HOST:-db.local}",
+					port: "${OPTIONAL_DB_PORT:-5432}",
+				},
+			}),
+		);
+
+		try {
+			const config = createConfigSync({
+				schema: {
+					database_host: eg.string(),
+					database_port: eg.string(),
+				},
+				configDir: tmpDir,
+			});
+
+			expect(config.database_host).toBe("db.local");
+			expect(config.database_port).toBe("6543");
+		} finally {
+			delete process.env.OPTIONAL_DB_PORT;
+			rmSync(tmpDir, { recursive: true, force: true });
+		}
+	});
+
 	it("works with .env files", () => {
 		const tmpDir = join(tmpdir(), `turar-envfile-${Date.now()}`);
 		mkdirSync(tmpDir, { recursive: true });

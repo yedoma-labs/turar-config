@@ -138,6 +138,19 @@ Reference environment variables in config files using `${VAR}` syntax:
 }
 ```
 
+Use `${VAR:-fallback}` to provide a default when the variable is unset or empty. Without a fallback, an unset variable is an error:
+
+```json
+{
+	"database": {
+		"host": "${DB_HOST:-localhost}",
+		"port": "${DB_PORT:-5432}"
+	}
+}
+```
+
+The fallback is used literally (no nested interpolation) and cannot contain `}`.
+
 To escape interpolation, use `\${VAR}`:
 
 ```json

@@ -36,6 +36,57 @@ describe("interpolateValue", () => {
 	it("handles empty string", () => {
 		expect(interpolateValue("", {})).toBe("");
 	});
+
+	describe("fallback syntax ${VAR:-fallback}", () => {
+		it("uses the fallback when the variable is unset", () => {
+			expect(interpolateValue("${PORT:-3000}", {})).toBe("3000");
+		});
+
+		it("uses the fallback when the variable is empty", () => {
+			expect(interpolateValue("${PORT:-3000}", { PORT: "" })).toBe("3000");
+		});
+
+		it("prefers the variable value when it is set", () => {
+			expect(interpolateValue("${PORT:-3000}", { PORT: "8080" })).toBe("8080");
+		});
+
+		it("allows an empty fallback", () => {
+			expect(interpolateValue("[${OPT:-}]", {})).toBe("[]");
+		});
+
+		it("keeps colons and further ':-' inside the fallback", () => {
+			expect(interpolateValue("${URL:-http://localhost:8080}", {})).toBe("http://localhost:8080");
+			expect(interpolateValue("${A:-x:-y}", {})).toBe("x:-y");
+		});
+
+		it("still throws when unset and no fallback is given", () => {
+			expect(() => interpolateValue("${MISSING}", { OTHER: "1" })).toThrow(/MISSING/);
+		});
+
+		it("does not change an empty value without fallback", () => {
+			expect(interpolateValue("${EMPTY}", { EMPTY: "" })).toBe("");
+		});
+
+		it("combines fallbacks with other variables in one string", () => {
+			expect(
+				interpolateValue("postgresql://${DB_HOST:-localhost}:${DB_PORT:-5432}/app", {
+					DB_PORT: "6543",
+				}),
+			).toBe("postgresql://localhost:6543/app");
+		});
+
+		it("keeps escaped fallback syntax literal", () => {
+			expect(interpolateValue("\\${VAR:-x}", {})).toBe("${VAR:-x}");
+		});
+
+		it("applies fallbacks inside nested objects and arrays", () => {
+			const result = interpolateObject(
+				{ server: { port: "${PORT:-3000}" }, hosts: ["${HOST:-a.local}"] },
+				{},
+			);
+			expect(result).toEqual({ server: { port: "3000" }, hosts: ["a.local"] });
+		});
+	});
 });
 
 describe("interpolateObject", () => {
