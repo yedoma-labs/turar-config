@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/yedoma-labs/turar-config/compare/v0.3.4...v0.4.0) (2026-10-27)
+
+
+### Features
+
+* **interpolation:** support ${VAR:-fallback} defaults in config files ([773f3de](https://github.com/yedoma-labs/turar-config/commit/773f3dec7ea269aadee8820971f6e482554ddc14))
+
 ## [0.3.4](https://github.com/yedoma-labs/turar-config/compare/v0.3.3...v0.3.4) (2026-10-26)
 
 
